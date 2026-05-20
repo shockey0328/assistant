@@ -1,0 +1,12 @@
+# 纯前端部署，无需 Serverless API（API Key 在浏览器 localStorage 配置）
+api/
+src/
+app.py
+requirements.txt
+public/
+启动工具.bat
+start.ps1
+.cursor/
+agent-transcripts/
+_doc_extract.txt
+*.log

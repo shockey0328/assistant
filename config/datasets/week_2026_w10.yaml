@@ -1,0 +1,29 @@
+# 2026 年第 10 周真实样例（3.5 — 3.11）
+id: week_2026_w10
+label: "2026年第10周（3.5—3.11）"
+period_start: "2026-03-05"
+period_end: "2026-03-11"
+default_feedback_time: "2026-03-11 12:00:00"
+
+sources:
+  feedback: "data/test/week_2026_w10_online_feedback.xlsx"
+  behavior_logs:
+    - "2026年3月5日用户行为日志.xlsx"
+    - "2026年3月6日用户行为日志.xlsx"
+    - "2026年3月7日用户行为日志.xlsx"
+    - "2026年3月8日用户行为日志.xlsx"
+    - "2026年3月9日用户行为日志.xlsx"
+    - "2026年3月10日用户行为日志.xlsx"
+    - "2026年3月11日用户行为日志.xlsx"
+
+outputs:
+  feedback_csv: "data/input/week_2026_w10_feedback.csv"
+  behavior_index: "data/behavior_logs/week_2026_w10_index.json"
+  behavior_users_dir: "data/behavior_logs/week_2026_w10_users"
+
+feedback_columns:
+  label_l1: "一级分类标签"
+  label_l2: "二级分类标签"
+  text: "有效信息"
+  membership: "用户身份"
+  user_id: "用户ID"

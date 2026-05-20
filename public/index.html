@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>橙子学 — 用户反馈分析助手</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 侧边导航 -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">🍊</div>
+            <h1>橙子学</h1>
+            <p>反馈分析助手</p>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" data-tab="classify">
+                <span class="nav-icon">📋</span>
+                <span>反馈分类</span>
+            </li>
+            <li class="nav-item" data-tab="path">
+                <span class="nav-icon">🔍</span>
+                <span>路径分析</span>
+            </li>
+            <li class="nav-item" data-tab="report">
+                <span class="nav-icon">📊</span>
+                <span>汇总报告</span>
+            </li>
+            <li class="nav-item" data-tab="revise">
+                <span class="nav-icon">📝</span>
+                <span>修订管理</span>
+            </li>
+            <li class="nav-item" data-tab="knowledge">
+                <span class="nav-icon">📖</span>
+                <span>产品知识</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="rules-count">
+                已学规则：<span id="rulesCount">0</span> 条
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+
+        <!-- Tab 1: 反馈分类 -->
+        <section class="tab-panel active" id="tab-classify">
+            <div class="panel-header">
+                <h2>📋 反馈分类分析</h2>
+                <p>上传用户反馈数据，AI 穿透表面分析本质需求</p>
+            </div>
+
+            <div class="input-section">
+                <!-- 文件上传 -->
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p>拖拽 CSV/Excel 文件到此处，或 <label for="fileInput" class="upload-link">点击上传</label></p>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
+                    <span class="upload-hint">支持 .csv / .xlsx 格式</span>
+                </div>
+
+                <!-- 或手动输入 -->
+                <div class="divider"><span>或直接粘贴反馈数据</span></div>
+
+                <div class="textarea-wrapper">
+                    <textarea id="feedbackInput" placeholder="每行一条反馈，格式：
+1. 用户ID: U10001, 时间: 2025-05-12 14:32, 留言: &quot;你好，你们这个卷子的解析答案不全啊&quot;
+2. 用户ID: U10002, 时间: 2025-05-12 15:01, 留言: &quot;第12题答案应该选B不是C吧？&quot;
+
+也可以直接粘贴CSV内容或自由文本描述"></textarea>
+                    <div class="textarea-footer">
+                        <span id="feedbackCount">0 条反馈</span>
+                        <button class="btn btn-primary" id="classifyBtn">
+                            <span class="btn-icon">🔄</span> 开始分析
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分析结果 -->
+            <div class="result-section" id="classifyResult" style="display:none;">
+                <div class="result-header">
+                    <h3>分析结果</h3>
+                    <div class="result-actions">
+                        <button class="btn btn-secondary" id="copyResultBtn">📋 复制</button>
+                        <button class="btn btn-secondary" id="downloadResultBtn">💾 下载MD</button>
+                    </div>
+                </div>
+                <div class="result-content markdown-body" id="classifyResultContent">
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: 路径分析 -->
+        <section class="tab-panel" id="tab-path">
+            <div class="panel-header">
+                <h2>🔍 用户路径分析</h2>
+                <p>根据行为日志定位用户反馈的具体资源，编织用户故事</p>
+            </div>
+
+            <div class="input-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>用户 ID</label>
+                        <input type="text" id="pathUid" placeholder="例: U10005">
+                    </div>
+                    <div class="form-group">
+                        <label>反馈时间</label>
+                        <input type="text" id="pathTime" placeholder="例: 2025-05-13 11:45">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>反馈原文</label>
+                        <input type="text" id="pathFeedback" placeholder="例: 怎么搜不到期末考试的卷子啊">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>行为日志（CSV 格式粘贴或上传文件）</label>
+                        <div class="upload-small" id="logUploadArea">
+                            <input type="file" id="logFileInput" accept=".csv" hidden>
+                            <button type="button" class="btn btn-secondary" id="logUploadBtn">📁 上传CSV</button>
+                            <span id="logFileName">未选择文件</span>
+                        </div>
+                        <textarea id="pathLogInput" placeholder="粘贴CSV格式的行为日志数据...
+user_id,timestamp,event_type,page_name,resource_id,resource_name,module,action_detail,duration
+U10005,2025-05-13 11:30:15,page_view,首页,,,首页,打开APP,5
+..." rows="8"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="pathBtn">
+                        <span class="btn-icon">🔍</span> 分析路径
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-section" id="pathResult" style="display:none;">
+                <div class="result-header">
+                    <h3>路径分析结果</h3>
+                    <div class="result-actions">
+                        <button class="btn btn-secondary" data-copy="pathResultContent">📋 复制</button>
+                        <button class="btn btn-secondary" data-download="pathResultContent" data-prefix="path_analysis">💾 下载</button>
+                    </div>
+                </div>
+                <div class="result-content markdown-body" id="pathResultContent"></div>
+            </div>
+        </section>
+
+        <!-- Tab 3: 汇总报告 -->
+        <section class="tab-panel" id="tab-report">
+            <div class="panel-header">
+                <h2>📊 汇总报告生成</h2>
+                <p>基于分类结果和路径分析，生成橙子学内容反馈周报</p>
+            </div>
+
+            <div class="input-section">
+                <div class="form-group">
+                    <label>已分类的反馈数据</label>
+                    <textarea id="reportClassified" placeholder="粘贴分类分析的结果（从反馈分类页面复制）..." rows="10"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>用户路径分析结果（可选）</label>
+                    <textarea id="reportPaths" placeholder="粘贴路径分析的结果（从路径分析页面复制）..." rows="6"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="reportBtn">
+                        <span class="btn-icon">📊</span> 生成周报
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-section" id="reportResult" style="display:none;">
+                <div class="result-header">
+                    <h3>橙子学内容反馈周报</h3>
+                    <div class="result-actions">
+                        <button class="btn btn-secondary" data-copy="reportResultContent">📋 复制</button>
+                        <button class="btn btn-secondary" data-download="reportResultContent" data-prefix="weekly_report">💾 下载</button>
+                    </div>
+                </div>
+                <div class="result-content markdown-body" id="reportResultContent"></div>
+            </div>
+        </section>
+
+        <!-- Tab 4: 修订管理 -->
+        <section class="tab-panel" id="tab-revise">
+            <div class="panel-header">
+                <h2>📝 修订管理</h2>
+                <p>记录分类修订，AI 会学习你的判断逻辑</p>
+            </div>
+
+            <div class="input-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>反馈序号</label>
+                        <input type="text" id="reviseId" placeholder="例: 1">
+                    </div>
+                    <div class="form-group">
+                        <label>AI 原始分类</label>
+                        <select id="reviseOriginal">
+                            <option value="查找资源">查找资源</option>
+                            <option value="内容错误">内容错误</option>
+                            <option value="内容缺失">内容缺失</option>
+                            <option value="⚠️待确认">⚠️待确认</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>修订为</label>
+                        <select id="reviseRevised">
+                            <option value="查找资源">查找资源</option>
+                            <option value="内容错误">内容错误</option>
+                            <option value="内容缺失">内容缺失</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>反馈原文</label>
+                        <input type="text" id="reviseText" placeholder="用户的原始反馈内容">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>修订原因</label>
+                        <input type="text" id="reviseReason" placeholder="为什么需要修改分类？">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>学到的规则（可选）</label>
+                        <input type="text" id="reviseRule" placeholder="从此修订中提炼的分类规则，供后续分析使用">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="reviseBtn">
+                        <span class="btn-icon">💾</span> 提交修订
+                    </button>
+                </div>
+            </div>
+
+            <!-- 已学规则展示 -->
+            <div class="rules-section">
+                <h3>🧠 已学规则</h3>
+                <div id="rulesList" class="rules-list">
+                    <p class="empty-state">暂无规则，提交修订后 AI 会自动学习</p>
+                </div>
+            </div>
+
+            <!-- 修订历史 -->
+            <div class="revision-history">
+                <h3>📜 修订历史</h3>
+                <div id="revisionList" class="revision-list">
+                    <p class="empty-state">暂无修订记录</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 5: 产品知识 -->
+        <section class="tab-panel" id="tab-knowledge">
+            <div class="panel-header">
+                <h2>📖 橙子学产品知识</h2>
+                <p>AI 分析时参照的产品功能说明</p>
+            </div>
+
+            <div class="knowledge-content">
+                <div class="knowledge-nav">
+                    <h3>使用导航</h3>
+                    <table class="knowledge-table">
+                        <thead><tr><th>学习需求</th><th>对应模块</th></tr></thead>
+                        <tbody>
+                            <tr><td>搜资源/试卷/学校</td><td><span class="module-tag">搜索</span></td></tr>
+                            <tr><td>不会的题要讲解</td><td><span class="module-tag">拍照答疑</span></td></tr>
+                            <tr><td>整理错题反复练</td><td><span class="module-tag">错题本</span></td></tr>
+                            <tr><td>刷名校真题</td><td><span class="module-tag">刷真题</span></td></tr>
+                            <tr><td>跟教材同步学习</td><td><span class="module-tag">同步学</span> <span class="module-tag">同步课</span></td></tr>
+                            <tr><td>每周巩固</td><td><span class="module-tag">周周练</span></td></tr>
+                            <tr><td>单元检测</td><td><span class="module-tag">同步学</span></td></tr>
+                            <tr><td>考前冲刺</td><td><span class="module-tag">备期中/期末</span> <span class="module-tag">备考课</span></td></tr>
+                            <tr><td>中考/高考系统复习</td><td><span class="module-tag">中考/高考·轮次</span></td></tr>
+                            <tr><td>假期预习复习</td><td><span class="module-tag">暑假/寒假</span></td></tr>
+                            <tr><td>学业水平考试</td><td><span class="module-tag">备学考</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="knowledge-modules">
+                    <h3>功能模块</h3>
+                    <div class="module-cards">
+                        <div class="module-card">
+                            <div class="module-card-header scene-search">搜与问</div>
+                            <div class="module-card-body">
+                                <div class="module-item"><strong>搜索</strong><br>支持搜试卷、搜资源、搜学校</div>
+                                <div class="module-item"><strong>拍照答疑</strong><br>拍单题/整页/跨页，分步讲题</div>
+                                <div class="module-item"><strong>错题本</strong><br>多维筛选，下载打印再练</div>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-card-header scene-practice">刷真题</div>
+                            <div class="module-card-body">
+                                <div class="module-item"><strong>刷真题</strong><br>名校卷每日更新，精准学+AI答疑+举一反三</div>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-card-header scene-sync">学教材</div>
+                            <div class="module-card-body">
+                                <div class="module-item"><strong>同步学</strong><br>诊薄弱·精准练 + 夯基础·学知识 + 单元测试</div>
+                                <div class="module-item"><strong>同步课</strong><br>名师视频同步讲解</div>
+                                <div class="module-item"><strong>周周练</strong><br>小学语数英周测</div>
+                                <div class="module-item"><strong>知识清单</strong><br>梳理脉络，高效复习</div>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-card-header scene-exam">备考冲刺</div>
+                            <div class="module-card-body">
+                                <div class="module-item"><strong>备期中/期末</strong><br>轻松学 + 精准练 + 试卷</div>
+                                <div class="module-item"><strong>备考课</strong><br>升学备考视频精讲</div>
+                                <div class="module-item"><strong>中考·轮次</strong><br>诊薄弱 + 学典例 + 精准练 + 试卷</div>
+                                <div class="module-item"><strong>高考·轮次</strong><br>学典例 + 精准练 + 试卷</div>
+                                <div class="module-item"><strong>备学考</strong><br>专项复习讲义 + 仿真模拟卷</div>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-card-header scene-holiday">假期提升</div>
+                            <div class="module-card-body">
+                                <div class="module-item"><strong>暑假/寒假</strong><br>新知预习 + 开学测试</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="knowledge-features">
+                    <h3>贯穿功能</h3>
+                    <div class="feature-tags">
+                        <span class="feature-tag">🖥️ 在线练 — 在线作答，自动批改，学情报告</span>
+                        <span class="feature-tag">🤖 AI答疑 — 分步讲解，举一反三</span>
+                        <span class="feature-tag">🖨️ 下载打印 — PDF下载，扫码查看解析</span>
+                        <span class="feature-tag">📕 错题本 — 一键添加，多维筛选，重练</span>
+                        <span class="feature-tag">🎯 精准学标签 — 在线练+完整学情报告</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Loading 遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loadingText">AI 正在分析中...</p>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

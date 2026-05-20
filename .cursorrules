@@ -1,0 +1,40 @@
+# 项目：橙子学用户需求分析工具
+
+## 产品背景
+橙子学（学科网学生版）是一个 K12 在线学习平台。
+本工具用于每周分析用户反馈（聚焦「内容问题」类），识别需求、判断满足状态并提炼内容建设优先级。
+匹配产品功能和内容规划，给出优先级建议。
+
+## 技术栈
+- Next.js 14 (App Router)
+- TypeScript (strict mode)
+- Tailwind CSS + shadcn/ui
+- Supabase (PostgreSQL)
+- DeepSeek API（通过 openai SDK 调用，baseURL: https://api.deepseek.com）
+- papaparse (CSV) + xlsx (Excel)
+- date-fns, lucide-react, recharts
+
+## 代码约定
+- 函数式组件 + Hooks
+- 优先 Server Components，交互组件用 "use client"
+- API 统一返回 { success: boolean, data?: T, error?: string }
+- zod 输入校验
+- 中文界面，专业简洁风格
+
+## 反馈 CSV 字段映射（在线问题反馈）
+推荐表头：一级分类标签、二级分类标签、有效信息、用户身份、用户ID、反馈时间
+亦支持：一级问题标签、二级问题标签（与运营导出表一致）、feedback_text、membership、user_id、feedback_time、seq 等别名
+Excel 日期格会自动转为 yyyy-MM-dd HH:mm:ss（非序列号）
+第1列 → category_l1（一级分类标签）
+第2列 → category_l2（二级分类标签）
+第3列 → content（有效信息 / feedback_text）
+第4列 → member_type（用户身份 / membership 会员等级数字）
+第5列 → user_identifier（用户ID）
+第6列 → feedback_time（反馈时间）
+
+## 会员等级
+49=月卡, 99=季卡, 188=半年卡, 219=月卡升年卡, 268=年卡, 598=三年卡, 空=免费用户
+
+## AI 接口
+- base_url：见 config/settings.yaml 或 .env 中的 OPENAI_BASE_URL（默认 https://api.aimindsky.com/v1）
+- API 密钥：仅放在 .env 的 OPENAI_API_KEY，勿写入仓库

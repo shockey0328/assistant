@@ -1,0 +1,21 @@
+# =============================================
+# 项目配置
+# =============================================
+
+ai:
+  provider: "openai"          # openai / anthropic / deepseek / zhipu
+  model: "gpt-4o"             # 模型名称
+  base_url: "https://api.aimindsky.com/v1"
+  api_key_env: "OPENAI_API_KEY"  # API密钥的环境变量名
+  temperature: 0.3
+  max_tokens: 8000
+
+data:
+  feedback_input_dir: "data/input/"
+  behavior_log_dir: "data/behavior_logs/"
+  output_dir: "data/output/"
+  revision_log_file: "data/revisions/revision_log.json"
+  learned_rules_file: "data/revisions/learned_rules.json"
+
+path_analysis:
+  time_window_minutes: 30

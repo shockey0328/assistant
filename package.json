@@ -1,0 +1,7 @@
+{
+  "name": "feedback-assistant",
+  "private": true,
+  "scripts": {
+    "build": "python scripts/vercel_build.py"
+  }
+}

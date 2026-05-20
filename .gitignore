@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+
+# 环境与密钥
+.env
+.env.*
+
+# 数据（保留目录结构）
+data/input/*
+!data/input/.gitkeep
+data/behavior_logs/*
+!data/behavior_logs/.gitkeep
+data/output/*
+!data/output/.gitkeep
+data/revisions/*
+!data/revisions/.gitkeep
+
+# 构建产物
+dist/
+
+# 嵌套的旧 Git 克隆目录（勿提交，避免重复）
+feedback-assistant/
+
+# 临时文件
+_doc_extract.txt
+*.log
+.DS_Store
+Thumbs.db

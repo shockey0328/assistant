@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>橙子学 — 反馈分析助手</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="sidebar" aria-label="主导航">
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-top">
+            <img class="sidebar-logo" src="assets/xiaochengzi.png" width="64" height="92" alt="小橙子">
+            <div>
+                <h1>橙子学</h1>
+                <p>反馈分析助手</p>
+            </div>
+        </div>
+    </div>
+    <p class="sidebar-workflow">工作流程</p>
+    <ul class="nav nav-primary">
+        <li class="active" data-tab="classify"><span class="nav-label">反馈分类</span></li>
+        <li data-tab="path"><span class="nav-label">路径分析</span></li>
+        <li data-tab="report"><span class="nav-label">汇总报告</span></li>
+    </ul>
+    <div class="nav-settings">
+        <button type="button" class="nav-settings-btn" data-tab="settings" aria-label="设置">
+            <span class="nav-settings-icon" aria-hidden="true">&#9881;</span>
+            <span class="nav-label">设置</span>
+        </button>
+    </div>
+    <div class="sidebar-ft">
+        <span class="pill">已学规则 <b id="rulesCount">0</b> 条</span>
+    </div>
+</nav>
+
+<main class="main">
+
+    <section class="panel panel-classify active" id="tab-classify" aria-labelledby="classify-title">
+        <div class="page-stack">
+        <header class="page-header page-header-stack">
+            <h2 class="page-title" id="classify-title">反馈分类</h2>
+            <p class="page-desc">上传或粘贴反馈，AI 分析后可在表格内直接修订分类与结论。</p>
+            <p class="page-hint-banner" role="note">导入周期反馈 → AI 识别需求与满足状态 → 表格内直接修订结论</p>
+        </header>
+        <div class="module-section">
+            <div class="section-head section-head-with-actions">
+                <h3 class="section-title">导入反馈</h3>
+                <div class="section-head-actions">
+                    <button type="button" class="btn btn-s btn-p" id="loadWeekFeedbackBtn">加载测试文件</button>
+                </div>
+            </div>
+        <div class="card card-import module-card">
+            <div class="import-grid">
+                <div class="import-col-upload">
+                    <div class="card-head import-col-head">
+                        <p class="import-col-caption">上传文件</p>
+                    </div>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon" aria-hidden="true">&#128193;</div>
+                        <p>拖拽文件到此处，或 <label for="fileInput">点击选择</label></p>
+                        <input type="file" id="fileInput" accept=".csv,.txt,.xlsx,.xls" hidden>
+                        <p class="upload-hint">支持 .xlsx / .xls / .csv / .txt</p>
+                    </div>
+                </div>
+                <div class="import-col-text">
+                    <div class="card-head import-col-head">
+                        <p class="import-col-caption">粘贴或编辑</p>
+                        <button type="button" class="btn btn-s" id="editDocBtn">编辑文档</button>
+                    </div>
+                    <textarea id="feedbackInput" rows="14" placeholder="每条反馈一行，或粘贴 CSV / 自由文本…"></textarea>
+                    <div id="classifyBelow" class="card-foot classify-below" hidden>
+                        <span class="count" id="feedbackCount">0 条</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="module-section module-section-table">
+            <div class="section-head">
+                <h3 class="section-title">批量分析与修订</h3>
+            </div>
+        <div class="card batch-card module-card" id="batchPanel" style="display:none;">
+            <div class="batch-toolbar">
+                <h3 class="batch-title" id="batchPreviewTitle">批量分类 · 共 0 条</h3>
+                <div class="batch-actions">
+                    <button type="button" class="btn btn-s" id="cancelClassifyBtn" style="display:none;">取消</button>
+                    <button type="button" class="btn btn-batch" id="classifyBtn">开始 AI 分析</button>
+                </div>
+            </div>
+            <div class="batch-progress-wrap">
+                <div class="batch-progress-track"><div class="batch-progress-fill" id="batchProgressFill"></div></div>
+                <span class="batch-progress-text" id="batchProgressText">0 / 0</span>
+            </div>
+            <div class="batch-table-wrap">
+                <table class="batch-table batch-table-feedback">
+                    <thead>
+                        <tr>
+                            <th class="col-num">序号</th>
+                            <th class="col-l1">一级分类标签</th>
+                            <th class="col-l2-src">二级分类标签</th>
+                            <th class="col-msg">有效信息</th>
+                            <th class="col-member">用户身份</th>
+                            <th class="col-uid">用户ID</th>
+                            <th class="col-time">反馈时间</th>
+                            <th class="col-l2-ai col-analysis">AI二级分类</th>
+                            <th class="col-module col-analysis">关联模块</th>
+                            <th class="col-result col-analysis">分析详情</th>
+                            <th class="col-path col-analysis">路径分析</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchTableBody"></tbody>
+                </table>
+            </div>
+            <details class="batch-learned-panel" id="batchLearnedPanel">
+                <summary>已学规则 <b id="batchRulesCount">0</b> 条 · 修订记录 <b id="batchRevCount">0</b> 条</summary>
+                <div class="batch-learned-body">
+                    <div class="batch-learned-col">
+                        <h4 class="batch-learned-h4">已学规则</h4>
+                        <div id="batchRulesList"><p class="empty">暂无规则</p></div>
+                    </div>
+                    <div class="batch-learned-col">
+                        <h4 class="batch-learned-h4">修订历史</h4>
+                        <div id="batchRevisionList"><p class="empty">暂无修订记录</p></div>
+                    </div>
+                </div>
+            </details>
+            <div class="card-foot batch-confirm-foot">
+                <p class="classify-confirm-status" id="classifyConfirmStatus">确认后将同步「需查路径」与分析结论至「路径分析」与「汇总报告」</p>
+                <button type="button" class="btn btn-p" id="confirmClassifyBtn" disabled>确认分类</button>
+            </div>
+        </div>
+        </div>
+        </div>
+    </section>
+
+    <section class="panel" id="tab-settings" aria-labelledby="settings-hub-title">
+        <div class="page-stack">
+        <header class="page-header page-header-stack page-header-compact">
+            <h2 class="page-title" id="settings-hub-title">设置</h2>
+            <p class="page-hint-banner page-hint-banner-muted" role="note">配置 AI 接口与产品知识库，供分类与路径分析共用</p>
+        </header>
+        <div class="settings-tabs" role="tablist">
+            <button type="button" class="settings-tab active" role="tab" data-settings-pane="api" aria-selected="true">API 设置</button>
+            <button type="button" class="settings-tab" role="tab" data-settings-pane="knowledge">产品知识</button>
+        </div>
+        <div id="settings-pane-api" class="settings-pane active" role="tabpanel">
+            <p class="settings-pane-desc">配置 AI 接口后，后续分类、路径与报告均会调用同一套凭证。Key 仅存在浏览器 localStorage。</p>
+        <div class="card module-card">
+            <div class="card-head">
+                <h3 class="card-head-title">连接配置</h3>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="aiProvider">API 提供方</label>
+                    <select id="aiProvider">
+                        <option value="openai">OpenAI</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="zhipu">智谱 BigModel</option>
+                        <option value="custom">自定义（OpenAI 兼容）</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="aiModel">模型名称</label>
+                    <input type="text" id="aiModel" value="gpt-4o" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-field">
+                    <label for="apiKey">API Key <span class="label-hint">localStorage 本地存储</span></label>
+                    <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+                </div>
+            </div>
+            <div class="form-row full" id="customBaseRow" style="display:none;">
+                <div class="form-field">
+                    <label for="customBase">自定义 Base URL</label>
+                    <input type="text" id="customBase" placeholder="https://api.aimindsky.com/v1">
+                </div>
+            </div>
+            <div class="card-foot">
+                <span class="status-text" id="settingsStatus"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-s" id="testApiBtn">测试连接</button>
+                    <button type="button" class="btn btn-p" id="saveSettingsBtn">保存设置</button>
+                </div>
+            </div>
+        </div>
+        <div class="card module-card">
+            <div class="card-head">
+                <h3 class="card-head-title">说明</h3>
+            </div>
+            <div class="tip-list">
+                <p><strong>OpenAI</strong> &mdash; 官方或代理，推荐 <code>gpt-4o</code></p>
+                <p><strong>DeepSeek</strong> &mdash; 国内接口，推荐 <code>deepseek-chat</code></p>
+                <p><strong>智谱 GLM</strong> &mdash; open.bigmodel.cn，推荐 <code>glm-4-flash</code> / <code>glm-4-plus</code></p>
+                <p><strong>自定义 / 意思天空</strong> &mdash; 填写兼容 Base URL 与 Key</p>
+            </div>
+            <div class="alert alert-warn">API Key 仅保留在本机浏览器，请勿在公共电脑保存真实 Key。未配置时 AI 功能不可用。</div>
+        </div>
+
+        </div>
+
+        <div id="settings-pane-knowledge" class="settings-pane" role="tabpanel">
+            <p class="settings-pane-desc">AI 分析时参照的产品功能说明。产品增删可在下方「AI 知识维护」同步，自动注入分析。</p>
+            <div class="card card-know-ai module-card">
+                <div class="card-head">
+                    <h3 class="card-head-title">AI 知识维护</h3>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-s" id="productKnowledgeSaveBtn">仅保存补充</button>
+                        <button type="button" class="btn btn-p" id="productKnowledgeAiBtn">AI 补充并更新</button>
+                    </div>
+                </div>
+                <p class="know-ai-desc">贴上本期产品功能增删、调整或下线说明，由 AI 整理并写入「动态补充知识」，后续分类与路径分析均会使用。</p>
+                <div class="form-field">
+                    <label for="productSyncInput">本期产品变更说明</label>
+                    <textarea id="productSyncInput" rows="5" placeholder="例：【新增】XX 模块…【调整】同步学…【下线】旧版入口…"></textarea>
+                </div>
+                <p class="status-text status-text-block" id="productKnowledgeStatus"></p>
+                <div class="form-field know-ai-extra">
+                    <label for="productKnowledgeExtra">动态补充知识 <span class="label-hint">可手动编辑，保存后生效</span></label>
+                    <textarea id="productKnowledgeExtra" rows="10" placeholder="AI 补充或手动维护的产品知识将显示在此…"></textarea>
+                </div>
+            </div>
+            <div class="know-wrap">
+                <div class="card">
+                    <h3 class="card-title">使用导航</h3>
+                    <table class="k-table">
+                        <thead><tr><th>学习需求</th><th>对应模块</th></tr></thead>
+                        <tbody>
+                            <tr><td>搜资源/试卷/学校</td><td><span class="mtag">搜索</span></td></tr>
+                            <tr><td>不会的题要讲解</td><td><span class="mtag">拍照答疑</span></td></tr>
+                            <tr><td>整理错题反复练</td><td><span class="mtag">错题本</span></td></tr>
+                            <tr><td>刷名校真题</td><td><span class="mtag">刷真题</span></td></tr>
+                            <tr><td>跟教材同步学习</td><td><span class="mtag">同步学</span> <span class="mtag">同步课</span></td></tr>
+                            <tr><td>每周巩固</td><td><span class="mtag">周周练</span></td></tr>
+                            <tr><td>单元检测</td><td><span class="mtag">同步学</span></td></tr>
+                            <tr><td>考前冲刺</td><td><span class="mtag">备期中/期末</span> <span class="mtag">备考课</span></td></tr>
+                            <tr><td>中考/高考系统复习</td><td><span class="mtag">中考/高考·轮次</span></td></tr>
+                            <tr><td>假期预习复习</td><td><span class="mtag">暑假/寒假</span></td></tr>
+                            <tr><td>学业水平考试</td><td><span class="mtag">备学考</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">功能模块</h3>
+                    <div class="mcards">
+                        <div class="mcard">
+                            <div class="mcard-hd bg1">搜与问</div>
+                            <div class="mcard-bd">
+                                <div class="mcard-item"><strong>搜索</strong><br>支持搜试卷、搜资源、搜学校</div>
+                                <div class="mcard-item"><strong>拍照答疑</strong><br>拍单题/整页/跨页，分步讲题</div>
+                                <div class="mcard-item"><strong>错题本</strong><br>多维筛选，下载打印再练</div>
+                            </div>
+                        </div>
+                        <div class="mcard">
+                            <div class="mcard-hd bg2">刷真题</div>
+                            <div class="mcard-bd">
+                                <div class="mcard-item"><strong>刷真题</strong><br>名校卷每日更新，精准学+AI答疑+举一反三</div>
+                            </div>
+                        </div>
+                        <div class="mcard">
+                            <div class="mcard-hd bg3">学教材</div>
+                            <div class="mcard-bd">
+                                <div class="mcard-item"><strong>同步学</strong><br>诊薄弱·精准练 + 夯基础·学知识 + 单元测试</div>
+                                <div class="mcard-item"><strong>同步课</strong><br>名师视频同步讲解</div>
+                                <div class="mcard-item"><strong>周周练</strong><br>小学语数英周测</div>
+                                <div class="mcard-item"><strong>知识清单</strong><br>梳理脉络，高效复习</div>
+                            </div>
+                        </div>
+                        <div class="mcard">
+                            <div class="mcard-hd bg4">备考冲刺</div>
+                            <div class="mcard-bd">
+                                <div class="mcard-item"><strong>备期中/期末</strong><br>轻松学 + 精准练 + 试卷</div>
+                                <div class="mcard-item"><strong>备考课</strong><br>升学备考视频精讲</div>
+                                <div class="mcard-item"><strong>中考·轮次</strong><br>诊薄弱 + 学典例 + 精准练 + 试卷</div>
+                                <div class="mcard-item"><strong>高考·轮次</strong><br>学典例 + 精准练 + 试卷</div>
+                                <div class="mcard-item"><strong>备学考</strong><br>专项复习讲义 + 仿真模拟卷</div>
+                            </div>
+                        </div>
+                        <div class="mcard">
+                            <div class="mcard-hd bg5">假期提升</div>
+                            <div class="mcard-bd">
+                                <div class="mcard-item"><strong>暑假/寒假</strong><br>新知预习 + 开学测试</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">贯穿功能</h3>
+                    <div class="ftags">
+                        <span class="ftag">🖥️ 在线练 — 在线作答，自动批改，学情报告</span>
+                        <span class="ftag">🤖 AI答疑 — 分步讲解，举一反三</span>
+                        <span class="ftag">🖨️ 下载打印 — PDF下载，扫码查看解析</span>
+                        <span class="ftag">📕 错题本 — 一键添加，多维筛选，重练</span>
+                        <span class="ftag">🎯 精准学标签 — 在线练+完整学情报告</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <section class="panel" id="tab-path" aria-labelledby="path-title">
+        <div class="page-stack">
+        <header class="page-header page-header-stack">
+            <h2 class="page-title" id="path-title">用户路径分析</h2>
+            <p class="page-desc">结合行为日志，定位反馈对应资源并编织用户故事。</p>
+            <p class="page-hint-banner" role="note">选择已分类周期与需查路径用户 → 加载行为日志 → 生成用户故事</p>
+        </header>
+        <div class="path-layout">
+            <div class="section-head report-layout-head path-layout-head-left">
+                <h3 class="section-title">用户与周期</h3>
+            </div>
+            <div class="section-head report-layout-head path-layout-head-right path-layout-head-result">
+                <h3 class="section-title">路径分析结果</h3>
+                <div class="section-head-actions btn-group">
+                    <button type="button" class="btn btn-p" id="pathSaveBtn" disabled>保存至汇总报告</button>
+                    <button type="button" class="btn btn-s" onclick="copyMd('pathBody')">复制</button>
+                    <button type="button" class="btn btn-s" onclick="dlMd('pathBody','path_analysis')">下载</button>
+                </div>
+            </div>
+            <div class="path-col-main">
+                <div class="card card-path-fill module-card path-block">
+                    <div class="path-fill-setup">
+                        <div class="form-field">
+                            <label for="pathPeriod">选择反馈周期</label>
+                            <select id="pathPeriod"><option value="">请选择周期</option></select>
+                        </div>
+                        <div class="path-fill-mode-wrap">
+                            <p class="path-fill-mode-legend" id="pathModeLegend">填充方式</p>
+                            <div class="path-fill-mode" role="radiogroup" aria-labelledby="pathModeLegend">
+                                <label class="path-mode-opt">
+                                    <input type="radio" name="pathFillMode" value="filter" checked>
+                                    <span class="path-mode-text">
+                                        <span class="path-mode-label">筛选</span>
+                                        <span class="path-mode-hint">从该周期已分类且勾选「需查路径」的用户中选择</span>
+                                    </span>
+                                </label>
+                                <label class="path-mode-opt">
+                                    <input type="radio" name="pathFillMode" value="manual">
+                                    <span class="path-mode-text">
+                                        <span class="path-mode-label">自主填写</span>
+                                        <span class="path-mode-hint">手动输入用户 ID 并加载日志</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="path-fill-details">
+                        <div id="pathFilterBlock" class="path-mode-panel">
+                            <div class="path-fill-grid">
+                                <div class="form-field">
+                                    <label for="pathNeedPathUser">需查路径用户</label>
+                                    <select id="pathNeedPathUser"><option value="">请先在该周期完成反馈分类并勾选需查路径</option></select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="pathLogCount">日志条数</label>
+                                    <input type="text" id="pathLogCount" readonly placeholder="加载后自动填充">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="pathManualBlock" class="path-mode-panel" hidden>
+                            <div class="path-fill-grid">
+                                <div class="form-field">
+                                    <label for="pathUid">用户 ID</label>
+                                    <input type="text" id="pathUid" placeholder="86728416">
+                                </div>
+                                <div class="form-field">
+                                    <label for="pathLogCountManual">日志条数</label>
+                                    <input type="text" id="pathLogCountManual" readonly placeholder="加载后自动填充">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="path-fill-grid path-fill-grid-common">
+                            <div class="form-field">
+                                <label for="pathTime">反馈时间</label>
+                                <input type="text" id="pathTime" placeholder="2026-03-11 12:00:00">
+                                <p class="field-hint" id="pathTimeHint">从分类表同步，用于截取该时间点前的行为日志</p>
+                            </div>
+                            <div class="form-field">
+                                <label for="pathFeedback">反馈原文</label>
+                                <input type="text" id="pathFeedback" placeholder="用户留言摘要">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="module-section path-module-log">
+                    <div class="section-head section-head-sub">
+                        <h3 class="section-title">行为日志</h3>
+                    </div>
+                    <div class="card module-card card-path-log">
+                        <div class="card-head">
+                            <span class="card-head-title">行为日志</span>
+                            <span class="card-head-actions">
+                            <button type="button" class="btn btn-s" id="pathPickLogDirBtn" hidden>选择日志目录</button>
+                            <label class="btn btn-s btn-file">
+                                上传 CSV
+                                <input type="file" id="logFileInput" accept=".csv" hidden>
+                            </label>
+                            </span>
+                        </div>
+                        <textarea id="pathLog" rows="10" placeholder="user_id,timestamp,event_type,page_name,module,action_detail…"></textarea>
+                        <div class="card-foot">
+                            <span></span>
+                            <button type="button" class="btn btn-p" id="pathBtn">分析路径</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="path-col-result">
+                <div class="result result-panel result-panel-flush" id="pathResult">
+                    <div class="result-body md path-result-md" id="pathBody"></div>
+                    <p class="result-placeholder" id="pathResultPlaceholder">完成路径分析后，结果将显示于此</p>
+                </div>
+                <p class="path-save-hint" id="pathSaveHint" hidden></p>
+                <div class="path-saved-panel" id="pathSavedPanel">
+                    <h4 class="path-saved-title">本周期已保存</h4>
+                    <p class="path-saved-empty" id="pathSavedEmpty">暂无，分析后点「保存至汇总报告」同步</p>
+                    <ul class="path-saved-list" id="pathSavedList"></ul>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <section class="panel" id="tab-report" aria-labelledby="report-title">
+        <div class="page-stack">
+        <header class="page-header page-header-stack">
+            <h2 class="page-title" id="report-title">汇总报告</h2>
+            <p class="page-desc">基于分类与路径结果，生成橙子学内容反馈周报。</p>
+            <p class="page-hint-banner" role="note">自动拉取分类结论与典型路径案例 → 一键生成内容反馈周报</p>
+        </header>
+        <div class="report-layout">
+            <div class="section-head report-layout-head report-layout-head-left">
+                <h3 class="section-title">周报材料</h3>
+            </div>
+            <div class="section-head report-layout-head report-layout-head-right">
+                <h3 class="section-title">生成结果</h3>
+                <div class="section-head-actions btn-group">
+                    <button type="button" class="btn btn-s" onclick="copyMd('reportBody')">复制</button>
+                    <button type="button" class="btn btn-s" onclick="dlMd('reportBody','weekly_report')">下载</button>
+                </div>
+            </div>
+            <div class="report-col-main">
+                <div class="card card-report-in module-card">
+                    <div class="form-row form-row-actions">
+                        <div class="form-field">
+                            <label for="reportPeriod">选择反馈周期</label>
+                            <select id="reportPeriod"><option value="">请选择周期</option></select>
+                        </div>
+                        <div class="form-field form-field-btn">
+                            <button type="button" class="btn btn-s" id="reportReloadBtn">刷新本周期数据</button>
+                        </div>
+                    </div>
+                    <div class="form-row full report-block">
+                        <div class="form-field">
+                            <label for="reportClassified">已分类反馈结论 <span class="label-hint">选周期后自动填充，可编辑</span></label>
+                            <textarea id="reportClassified" rows="10" placeholder="选择周期后自动生成，或手动粘贴…"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-field report-block">
+                        <span class="label-like">典型用户故事（路径分析）</span>
+                        <p class="field-hint" id="reportPathStoriesEmpty">暂无路径案例，请在「路径分析」分析后点「保存至汇总报告」</p>
+                        <div id="reportPathStories" class="report-path-stories"></div>
+                    </div>
+                    <div class="form-row full report-block">
+                        <div class="form-field">
+                            <label for="reportPaths">路径材料补充 <span class="label-hint">可选</span></label>
+                            <textarea id="reportPaths" rows="3" placeholder="额外路径摘录或备注…"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-foot">
+                        <span></span>
+                        <button type="button" class="btn btn-p" id="reportBtn">生成周报</button>
+                    </div>
+                </div>
+            </div>
+            <div class="report-col-result">
+                <div class="result result-panel result-panel-flush" id="reportResult">
+                    <div class="result-body md report-result-md" id="reportBody"></div>
+                    <p class="result-placeholder" id="reportResultPlaceholder">选择周期并生成周报后，结果将显示于此</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+</main>
+
+<div class="overlay" id="loading" role="alertdialog" aria-busy="true" aria-label="加载中">
+    <div class="spinner-box">
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="loadingText">AI 分析中…</p>
+    </div>
+</div>
+
+<div class="toast-box" id="toastBox" aria-live="polite"></div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
