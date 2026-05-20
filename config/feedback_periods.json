@@ -4,7 +4,7 @@
       "id": "week_2026_w10",
       "label": "26年第10周",
       "labelFull": "2026年第10周（3.5—3.11）",
-      "indexUrl": "data/behavior_logs/week_2026_w10_index.json",
+      "indexUrl": "data/test/behavior_logs/index.json",
       "feedbackCsv": "data/input/week_2026_w10_feedback.csv",
       "feedbackXlsx": "data/test/week_2026_w10_online_feedback.xlsx",
       "feedbackAiTxt": "data/input/week_2026_w10_feedback_ai.txt",

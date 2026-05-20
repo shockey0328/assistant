@@ -43,11 +43,6 @@ def main() -> int:
     if test_src.exists():
         copy_tree(test_src, DIST / "data" / "test")
 
-    index_json = ROOT / "data" / "behavior_logs" / "week_2026_w10_index.json"
-    if index_json.exists():
-        (DIST / "data" / "behavior_logs").mkdir(parents=True, exist_ok=True)
-        shutil.copy2(index_json, DIST / "data" / "behavior_logs" / index_json.name)
-
     assets = ROOT / "assets"
     if assets.exists() and any(assets.iterdir()):
         copy_tree(assets, DIST / "assets")

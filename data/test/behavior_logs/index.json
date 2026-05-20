@@ -1,0 +1,25 @@
+{
+  "id": "week_2026_w10",
+  "label": "测试用户（来自 测试文件/）",
+  "default_feedback_time": "2026-03-11 12:00:00",
+  "users": [
+    {
+      "user_id": "67640796",
+      "log_file": "data/test/behavior_logs/67640796.csv",
+      "log_rows": 93,
+      "source_name": "67640796的3月9日用户行为日志.csv"
+    },
+    {
+      "user_id": "68698141",
+      "log_file": "data/test/behavior_logs/68698141.csv",
+      "log_rows": 77,
+      "source_name": "68698141的3月5日用户日志.csv"
+    },
+    {
+      "user_id": "80071926",
+      "log_file": "data/test/behavior_logs/80071926.csv",
+      "log_rows": 122,
+      "source_name": "80071926的3月7日用户行为日志.csv"
+    }
+  ]
+}

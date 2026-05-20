@@ -49,16 +49,17 @@ if (fs.existsSync(testSrc)) {
   copyTree(testSrc, path.join(DIST, "data", "test"));
 }
 
-const indexJson = path.join(
+const testBehaviorIndex = path.join(
   ROOT,
   "data",
+  "test",
   "behavior_logs",
-  "week_2026_w10_index.json"
+  "index.json"
 );
-if (fs.existsSync(indexJson)) {
-  const destDir = path.join(DIST, "data", "behavior_logs");
-  fs.mkdirSync(destDir, { recursive: true });
-  copyFile(indexJson, path.join(destDir, path.basename(indexJson)));
+if (!fs.existsSync(testBehaviorIndex)) {
+  console.warn(
+    "WARN: data/test/behavior_logs/index.json missing — run: python scripts/sync_test_fixture.py"
+  );
 }
 
 const assets = path.join(ROOT, "assets");
