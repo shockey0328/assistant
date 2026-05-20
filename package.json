@@ -2,6 +2,6 @@
   "name": "feedback-assistant",
   "private": true,
   "scripts": {
-    "build": "python scripts/vercel_build.py"
+    "build": "node scripts/vercel_build.mjs"
   }
 }
