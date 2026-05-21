@@ -83,6 +83,7 @@ S = {
     "batch_end": "\u6761",
     "btn_export": "\u5bfc\u51fa\u7ed3\u679c",
     "btn_cancel": "\u53d6\u6d88",
+    "btn_clear_classify": "\u6e05\u7a7a\u5206\u6790",
     "btn_classify": "\u5f00\u59cb AI \u5206\u6790",
     "btn_confirm_classify": "\u786e\u8ba4\u5206\u7c7b",
     "classify_confirm_hint": "\u786e\u8ba4\u540e\u5c06\u540c\u6b65\u300c\u9700\u67e5\u8def\u5f84\u300d\u4e0e\u5206\u6790\u7ed3\u8bba\u81f3\u300c\u8def\u5f84\u5206\u6790\u300d\u4e0e\u300c\u6c47\u603b\u62a5\u544a\u300d",

@@ -85,6 +85,7 @@
             <div class="batch-toolbar">
                 <h3 class="batch-title" id="batchPreviewTitle">{{batch_title}} {{batch_mid}} 0 {{batch_end}}</h3>
                 <div class="batch-actions">
+                    <button type="button" class="btn btn-s" id="clearClassifyBtn" title="清空本周期 AI 分析结果，便于重新生成">{{btn_clear_classify}}</button>
                     <button type="button" class="btn btn-s" id="cancelClassifyBtn" style="display:none;">{{btn_cancel}}</button>
                     <button type="button" class="btn btn-batch" id="classifyBtn">{{btn_classify}}</button>
                 </div>

@@ -547,7 +547,10 @@ function mergeClassifySnapshotWithLive(snapshotItems) {
             relatedModule: live.relatedModule || si.relatedModule,
             needPath: live.needPath ?? si.needPath,
             status: live.status || si.status,
-            resultBody: live.resultBody || si.resultBody || stripStructuredFieldsFromResult(live.result) || ''
+            result: live.result || si.result || '',
+            resultBody: live.resultBody || si.resultBody
+                || resolveResultBody({ resultBody: si.resultBody, result: live.result || si.result })
+                || ''
         };
     });
 }
@@ -591,7 +594,8 @@ function saveClassifySnapshot(periodId, options = {}) {
             labelL2: i.labelL2,
             needPath: i.needPath,
             status: i.status,
-            resultBody: i.resultBody || stripStructuredFieldsFromResult(i.result) || ''
+            resultBody: resolveResultBody(i),
+            ...(i.status === 'done' && i.result ? { result: i.result } : {})
         }))
     };
     localStorage.setItem(LS_CLASSIFY_PREFIX + pid, JSON.stringify(snapshot));
@@ -653,6 +657,56 @@ function updateConfirmClassifyStatus() {
     } else {
         statusEl.textContent = CLASSIFY_CONFIRM_HINT;
     }
+}
+
+function clearClassifyAnalysis() {
+    if (batchRunning) {
+        batchAbort = true;
+        toast('正在停止当前分析，请稍后再清空', 'info');
+        return;
+    }
+    if (!batchItems.length) {
+        toast('暂无数据可清空', 'info');
+        return;
+    }
+    const hasAnalysis = batchItems.some(i =>
+        i.status !== 'pending' || i.categoryL2 || i.resultBody || i.result || i.needPath != null
+    );
+    const pid = getCurrentPeriodId();
+    const snap = getClassifySnapshot(pid);
+    if (!hasAnalysis && !snap?.items?.length) {
+        toast('当前无分析结果', 'info');
+        return;
+    }
+    if (!confirm('将清空本周期全部 AI 分析结果（含「确认分类」状态），之后可重新点击「开始 AI 分析」。是否继续？')) {
+        return;
+    }
+
+    batchItems.forEach(item => {
+        item.status = 'pending';
+        item.result = '';
+        item.resultBody = '';
+        item.categoryL2 = '';
+        item.relatedModule = '';
+        item.needPath = null;
+        item.aiSnapshot = undefined;
+        item.manuallyRevised = false;
+        item._editingResult = false;
+    });
+
+    localStorage.removeItem(LS_CLASSIFY_PREFIX + pid);
+    const alertEl = document.getElementById('batchAlert');
+    if (alertEl) {
+        alertEl.hidden = true;
+        alertEl.textContent = '';
+    }
+
+    renderBatchTable();
+    refreshPathFillUI();
+    refreshPathPeriodSelect();
+    refreshReportPeriodSelect();
+    updateConfirmClassifyStatus();
+    toast('已清空分析结果，可重新点击「开始 AI 分析」', 'ok');
 }
 
 function confirmClassify() {
@@ -1932,6 +1986,7 @@ function syncBatchFromText() {
         const cacheText = feedbackRowsToAiText(feedbackRowsCache).trim();
         if (cacheText && text === cacheText) {
             batchItems = fromCache;
+            restoreClassifySnapshotToBatch(getCurrentPeriodId());
             renderBatchTable();
             return;
         }
@@ -1980,6 +2035,7 @@ function syncBatchFromText() {
         }));
     }
     batchItems.forEach((it, i) => { it.seq = i + 1; });
+    restoreClassifySnapshotToBatch(getCurrentPeriodId());
     renderBatchTable();
     refreshPathFillUI();
     refreshReportPeriodSelect();
@@ -2021,6 +2077,29 @@ function stripStructuredFieldsFromResult(text) {
     return out.trim();
 }
 
+/** 将 prompt 要求的结构化字段拼成「分析详情」正文（表格列已展示二级分类/关联模块） */
+function buildResultBodyFromStructuredResult(text) {
+    if (!text) return '';
+    const displayFields = ['用户需求', '满足状态', '判断依据', '资源类型', '建设优先级', '建议'];
+    const lines = [];
+    for (const label of displayFields) {
+        const v = parseLabeledField(text, label);
+        if (!v || v === '—' || v === '-') continue;
+        lines.push(`**${label}：** ${v}`);
+    }
+    return lines.join('\n\n');
+}
+
+function resolveResultBody(item) {
+    const existing = (item?.resultBody || '').trim();
+    if (existing) return existing;
+    const raw = item?.result || '';
+    if (!raw) return '';
+    const free = stripStructuredFieldsFromResult(raw);
+    if (free) return free;
+    return buildResultBodyFromStructuredResult(raw);
+}
+
 const CATEGORY_L2_OPTIONS = ['查找资源', '内容需求', '内容错误', '无效反馈'];
 
 function normalizeCategoryL2(value) {
@@ -2045,7 +2124,7 @@ function applyAnalysisResult(item) {
     item.needPath = parseNeedPathFromResult(item.result);
     item.categoryL2 = normalizeCategoryL2(parseLabeledField(item.result, '二级分类'));
     item.relatedModule = parseLabeledField(item.result, '关联模块');
-    item.resultBody = stripStructuredFieldsFromResult(item.result);
+    item.resultBody = resolveResultBody(item);
     item.aiSnapshot = {
         categoryL2: item.categoryL2 || '',
         relatedModule: item.relatedModule || '',
@@ -2053,6 +2132,41 @@ function applyAnalysisResult(item) {
     };
     item.manuallyRevised = false;
     item._editingResult = false;
+}
+
+function restoreClassifySnapshotToBatch(periodId) {
+    const snap = getClassifySnapshot(periodId);
+    if (!snap?.items?.length || !batchItems.length) return;
+    batchItems = batchItems.map(item => {
+        const si = snap.items.find(s =>
+            s.seq === item.seq
+            || (s.userId && s.userId === item.userId && s.message === item.message)
+        );
+        if (!si) return item;
+        const merged = {
+            ...item,
+            status: si.status || item.status,
+            categoryL2: si.categoryL2 || item.categoryL2,
+            relatedModule: si.relatedModule || item.relatedModule,
+            needPath: si.needPath ?? item.needPath,
+            labelL1: si.labelL1 || item.labelL1,
+            labelL2: si.labelL2 || item.labelL2,
+            membership: si.membership ?? item.membership,
+            result: si.result || item.result || '',
+            resultBody: si.resultBody || item.resultBody || ''
+        };
+        if (merged.status === 'done') {
+            merged.resultBody = resolveResultBody(merged);
+            if (!merged.aiSnapshot && (si.categoryL2 || merged.categoryL2)) {
+                merged.aiSnapshot = {
+                    categoryL2: merged.categoryL2 || '',
+                    relatedModule: merged.relatedModule || '',
+                    resultBody: merged.resultBody || ''
+                };
+            }
+        }
+        return merged;
+    });
 }
 
 function isItemFieldRevised(item, field) {
@@ -2166,6 +2280,9 @@ function relatedModuleCellHtml(item) {
 
 function resultBodyHtml(item) {
     if (item.status === 'done') {
+        if (!item.resultBody?.trim() && item.result) {
+            item.resultBody = resolveResultBody(item);
+        }
         ensureAiSnapshot(item);
         if (item._editingResult) {
             const body = item.resultBody || '';
@@ -2178,9 +2295,12 @@ function resultBodyHtml(item) {
             </div>`;
         }
         const revised = isItemFieldRevised(item, 'resultBody');
-        const md = item.resultBody || stripStructuredFieldsFromResult(item.result);
+        const md = resolveResultBody(item);
+        const bodyHtml = md
+            ? renderMd(md)
+            : '<p class="result-empty">暂无分析正文，可点击「编辑结论」补充或重新批量分析</p>';
         return `<div class="cell-result done result-md cell-result-view">
-            ${renderMd(md)}
+            ${bodyHtml}
             <button type="button" class="btn-link batch-edit-result-btn" data-seq="${item.seq}">编辑结论</button>
             ${revised ? '<span class="tag-revised">已改</span>' : ''}
         </div>`;
@@ -2398,7 +2518,9 @@ async function runBatchClassify() {
     }
     const classifyBtn = document.getElementById('classifyBtn');
     const cancelBtn = document.getElementById('cancelClassifyBtn');
+    const clearBtn = document.getElementById('clearClassifyBtn');
     classifyBtn.disabled = true;
+    if (clearBtn) clearBtn.disabled = true;
     cancelBtn.style.display = '';
 
     const sysPrompt = buildSystemPrompt('classifySingle');
@@ -2408,7 +2530,9 @@ async function runBatchClassify() {
     for (const item of batchItems) {
         if (batchAbort) break;
         if (item.status === 'done' && item.result) {
+            if (!item.resultBody?.trim()) applyAnalysisResult(item);
             done++;
+            updateBatchRow(item.seq, { status: item.status, result: item.result });
             updateBatchProgress(done, total);
             continue;
         }
@@ -2447,6 +2571,7 @@ async function runBatchClassify() {
 
     batchRunning = false;
     classifyBtn.disabled = false;
+    if (clearBtn) clearBtn.disabled = false;
     cancelBtn.style.display = 'none';
 
     updateBatchAlertSummary();
@@ -2535,6 +2660,7 @@ function initClassify() {
     document.getElementById('editDocBtn')?.addEventListener('click', () => {
         showClassifyBelow();
         if (batchItems.length) {
+            restoreClassifySnapshotToBatch(getCurrentPeriodId());
             renderBatchTable();
             toast(`已展开预览，共 ${batchItems.length} 条`, 'ok');
             return;
@@ -2562,6 +2688,7 @@ function initClassify() {
         document.getElementById('feedbackCount').textContent = countFeedbackLines(t) + ' 条';
     });
 
+    document.getElementById('clearClassifyBtn')?.addEventListener('click', clearClassifyAnalysis);
     document.getElementById('classifyBtn')?.addEventListener('click', runBatchClassify);
     document.getElementById('cancelClassifyBtn')?.addEventListener('click', () => {
         batchAbort = true;
@@ -2952,8 +3079,10 @@ function pickTestFixtureFile() {
 function applyFeedbackRowsToUI(rows, periodId) {
     feedbackRowsCache = rows;
     batchItems = feedbackItemsFromRows(rows);
+    const pid = periodId || 'week_2026_w10';
+    restoreClassifySnapshotToBatch(pid);
     document.getElementById('feedbackInput').value = feedbackRowsToAiText(rows);
-    currentPeriodId = periodId || 'week_2026_w10';
+    currentPeriodId = pid;
     localStorage.setItem(LS_CURRENT_PERIOD, currentPeriodId);
     showClassifyBelow();
     renderBatchTable();
