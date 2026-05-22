@@ -146,6 +146,14 @@
             <button type="button" class="settings-tab active" role="tab" data-settings-pane="api" aria-selected="true">API 设置</button>
             <button type="button" class="settings-tab" role="tab" data-settings-pane="knowledge">产品知识</button>
         </div>
+        <div class="settings-period-bar card module-card">
+            <div class="settings-period-bar-text">
+                <span class="settings-period-bar-label">当前周期</span>
+                <strong class="settings-period-bar-value" id="settingsPeriodLabel">—</strong>
+                <p class="settings-period-bar-hint">清空后可重新 AI 分析、路径分析与生成周报（不影响 API 配置与产品知识）</p>
+            </div>
+            <button type="button" class="btn btn-s" id="clearPeriodAllBtn" title="清空当前周期的分类、路径与周报 AI 记录">清空全部记录</button>
+        </div>
         <div id="settings-pane-api" class="settings-pane active" role="tabpanel">
             <p class="settings-pane-desc">配置 AI 接口后，后续分类、路径与报告均会调用同一套凭证。Key 仅存在浏览器 localStorage。</p>
             <div class="settings-layout">
@@ -337,6 +345,7 @@
             <div class="section-head report-layout-head path-layout-head-right path-layout-head-result">
                 <h3 class="section-title">路径分析结果</h3>
                 <div class="section-head-actions btn-group">
+                    <button type="button" class="btn btn-s" id="clearPathHistoryBtn" title="清空本周期已保存的路径案例，便于重新分析">清空路径</button>
                     <button type="button" class="btn btn-p" id="pathSaveBtn" disabled>保存至汇总报告</button>
                     <button type="button" class="btn btn-s" onclick="copyMd('pathBody')">复制</button>
                     <button type="button" class="btn btn-s" onclick="dlMd('pathBody','path_analysis')">下载</button>
@@ -460,6 +469,7 @@
             <div class="section-head report-layout-head report-layout-head-right">
                 <h3 class="section-title">生成结果</h3>
                 <div class="section-head-actions btn-group">
+                    <button type="button" class="btn btn-s" id="clearReportHistoryBtn" title="清空本周期已生成的周报正文，便于重新生成">清空周报</button>
                     <button type="button" class="btn btn-s" onclick="copyMd('reportBody')">复制</button>
                     <button type="button" class="btn btn-s" onclick="dlMd('reportBody','weekly_report')">下载</button>
                 </div>

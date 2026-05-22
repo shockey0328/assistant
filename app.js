@@ -659,54 +659,228 @@ function updateConfirmClassifyStatus() {
     }
 }
 
-function clearClassifyAnalysis() {
-    if (batchRunning) {
+function itemHasClassifyAnalysis(item) {
+    return item && (
+        item.status !== 'pending' || item.categoryL2 || item.resultBody || item.result
+        || item.needPath != null
+    );
+}
+
+function resetClassifyItemFields(item) {
+    if (!item) return;
+    item.status = 'pending';
+    item.result = '';
+    item.resultBody = '';
+    item.categoryL2 = '';
+    item.relatedModule = '';
+    item.needPath = null;
+    item.aiSnapshot = undefined;
+    item.manuallyRevised = false;
+    item._editingResult = false;
+}
+
+function resetResultPanel(sectionId, bodyId, placeholderText) {
+    const bodyEl = document.getElementById(bodyId);
+    if (bodyEl) bodyEl.innerHTML = '';
+    const panel = document.getElementById(sectionId);
+    if (panel) panel.classList.remove('show');
+    const ph = document.getElementById(sectionId + 'Placeholder')
+        || panel?.querySelector('.result-placeholder');
+    if (ph) {
+        ph.hidden = false;
+        if (placeholderText) ph.textContent = placeholderText;
+    }
+}
+
+function periodHasClassifyAnalysis(periodId) {
+    const pid = periodId || getCurrentPeriodId();
+    const snap = getClassifySnapshot(pid);
+    if (snap?.items?.some(itemHasClassifyAnalysis)) return true;
+    if (batchItems.length && getCurrentPeriodId() === pid) {
+        return batchItems.some(itemHasClassifyAnalysis);
+    }
+    return false;
+}
+
+function periodHasPathHistory(periodId) {
+    return getPathStoriesForPeriod(periodId).length > 0;
+}
+
+function periodHasReportHistory(periodId) {
+    try {
+        const raw = JSON.parse(localStorage.getItem(LS_REPORT_PREFIX + periodId) || 'null');
+        return Boolean(raw?.markdown?.trim());
+    } catch {
+        return false;
+    }
+}
+
+function updateSettingsPeriodLabel() {
+    const el = document.getElementById('settingsPeriodLabel');
+    if (!el) return;
+    const pid = getCurrentPeriodId();
+    const period = getPeriodById(pid);
+    el.textContent = period ? (period.labelFull || period.label || pid) : (pid || '—');
+}
+
+function clearClassifyAnalysisForPeriod(periodId, options = {}) {
+    const pid = periodId || getCurrentPeriodId();
+    if (!options.skipRunningCheck && batchRunning && getCurrentPeriodId() === pid) {
         batchAbort = true;
         toast('正在停止当前分析，请稍后再清空', 'info');
-        return;
+        return false;
     }
-    if (!batchItems.length) {
-        toast('暂无数据可清空', 'info');
-        return;
+    if (!periodHasClassifyAnalysis(pid)) {
+        if (!options.quiet) toast('当前无分类分析结果', 'info');
+        return false;
     }
-    const hasAnalysis = batchItems.some(i =>
-        i.status !== 'pending' || i.categoryL2 || i.resultBody || i.result || i.needPath != null
-    );
-    const pid = getCurrentPeriodId();
-    const snap = getClassifySnapshot(pid);
-    if (!hasAnalysis && !snap?.items?.length) {
-        toast('当前无分析结果', 'info');
-        return;
+    if (batchItems.length && getCurrentPeriodId() === pid) {
+        batchItems.forEach(resetClassifyItemFields);
     }
-    if (!confirm('将清空本周期全部 AI 分析结果（含「确认分类」状态），之后可重新点击「开始 AI 分析」。是否继续？')) {
-        return;
-    }
-
-    batchItems.forEach(item => {
-        item.status = 'pending';
-        item.result = '';
-        item.resultBody = '';
-        item.categoryL2 = '';
-        item.relatedModule = '';
-        item.needPath = null;
-        item.aiSnapshot = undefined;
-        item.manuallyRevised = false;
-        item._editingResult = false;
-    });
-
     localStorage.removeItem(LS_CLASSIFY_PREFIX + pid);
     const alertEl = document.getElementById('batchAlert');
     if (alertEl) {
         alertEl.hidden = true;
         alertEl.textContent = '';
     }
-
-    renderBatchTable();
+    if (batchItems.length && getCurrentPeriodId() === pid) {
+        renderBatchTable();
+        updateConfirmClassifyStatus();
+    }
     refreshPathFillUI();
     refreshPathPeriodSelect();
     refreshReportPeriodSelect();
-    updateConfirmClassifyStatus();
-    toast('已清空分析结果，可重新点击「开始 AI 分析」', 'ok');
+    const reportPid = document.getElementById('reportPeriod')?.value;
+    if (reportPid === pid) loadReportPeriodData(pid);
+    return true;
+}
+
+function clearPathHistoryForPeriod(periodId, options = {}) {
+    const pid = periodId || getCurrentPeriodId();
+    if (!periodHasPathHistory(pid) && !pendingPathDraft?.result) {
+        if (!options.quiet) toast('当前无路径分析记录', 'info');
+        return false;
+    }
+    localStorage.removeItem(LS_PATH_PREFIX + pid);
+    if (!options.keepDraft || pendingPathDraft?.periodId === pid) {
+        pendingPathDraft = null;
+    }
+    renderPathSavedList(pid);
+    updatePathSaveButtonState();
+    if (!options.skipUi) {
+        resetResultPanel(
+            'pathResult',
+            'pathBody',
+            '完成路径分析后，结果将显示于此'
+        );
+    }
+    const reportPid = document.getElementById('reportPeriod')?.value;
+    if (reportPid === pid) {
+        renderReportPathStories(pid);
+        const pathTa = document.getElementById('reportPaths');
+        if (pathTa) pathTa.value = buildPathStoriesReportText(pid, true);
+    }
+    return true;
+}
+
+function clearReportHistoryForPeriod(periodId, options = {}) {
+    const pid = periodId || getCurrentPeriodId();
+    if (!periodHasReportHistory(pid)) {
+        if (!options.quiet) toast('当前无已生成的周报', 'info');
+        return false;
+    }
+    localStorage.removeItem(LS_REPORT_PREFIX + pid);
+    if (!options.skipUi) {
+        resetResultPanel(
+            'reportResult',
+            'reportBody',
+            '选择周期并生成周报后，结果将显示于此'
+        );
+        if (document.getElementById('reportPeriod')?.value === pid) {
+            loadReportPeriodData(pid);
+        }
+    }
+    return true;
+}
+
+function clearClassifyAnalysis() {
+    const pid = getCurrentPeriodId();
+    if (!batchItems.length && !getClassifySnapshot(pid)?.items?.length) {
+        toast('暂无数据可清空', 'info');
+        return;
+    }
+    if (!periodHasClassifyAnalysis(pid)) {
+        toast('当前无分析结果', 'info');
+        return;
+    }
+    if (!confirm('将清空本周期全部 AI 分类结果（含「确认分类」状态），之后可重新点击「开始 AI 分析」。是否继续？')) {
+        return;
+    }
+    if (clearClassifyAnalysisForPeriod(pid, { skipRunningCheck: false })) {
+        toast('已清空分类分析，可重新点击「开始 AI 分析」', 'ok');
+    }
+}
+
+function clearPathHistory() {
+    const pid = document.getElementById('pathPeriod')?.value || getCurrentPeriodId();
+    if (!periodHasPathHistory(pid) && !pendingPathDraft?.result) {
+        toast('当前无路径分析记录', 'info');
+        return;
+    }
+    if (!confirm('将清空本周期已保存的路径案例与当前结果展示，之后可重新分析路径。是否继续？')) {
+        return;
+    }
+    if (clearPathHistoryForPeriod(pid)) {
+        toast('已清空路径记录，可重新分析', 'ok');
+    }
+}
+
+function clearReportHistory() {
+    const pid = document.getElementById('reportPeriod')?.value || getCurrentPeriodId();
+    if (!periodHasReportHistory(pid)) {
+        toast('当前无已生成的周报', 'info');
+        return;
+    }
+    if (!confirm('将清空本周期已生成的周报正文（保留左侧汇总材料），之后可重新点击「生成周报」。是否继续？')) {
+        return;
+    }
+    if (clearReportHistoryForPeriod(pid)) {
+        toast('已清空周报结果，可重新生成', 'ok');
+    }
+}
+
+function clearAllPeriodHistory() {
+    if (batchRunning) {
+        batchAbort = true;
+        toast('正在停止当前分析，请稍后再清空', 'info');
+        return;
+    }
+    const pid = getCurrentPeriodId();
+    const period = getPeriodById(pid);
+    const label = period?.labelFull || period?.label || pid;
+    const parts = [];
+    if (periodHasClassifyAnalysis(pid)) parts.push('反馈分类 AI 结果');
+    if (periodHasPathHistory(pid) || pendingPathDraft?.result) parts.push('路径分析已保存案例');
+    if (periodHasReportHistory(pid)) parts.push('汇总周报生成结果');
+    if (!parts.length) {
+        toast('当前周期暂无可清空的 AI 记录', 'info');
+        return;
+    }
+    const msg = `将清空「${label}」的：\n\n· ${parts.join('\n· ')}\n\n导入的原始反馈数据会保留。清空后需重新分析 / 生成。是否继续？`;
+    if (!confirm(msg)) return;
+
+    clearClassifyAnalysisForPeriod(pid, { skipRunningCheck: true, quiet: true });
+    clearPathHistoryForPeriod(pid, { quiet: true, skipUi: true });
+    clearReportHistoryForPeriod(pid, { quiet: true, skipUi: true });
+
+    resetResultPanel('pathResult', 'pathBody', '完成路径分析后，结果将显示于此');
+    resetResultPanel('reportResult', 'reportBody', '选择周期并生成周报后，结果将显示于此');
+    pendingPathDraft = null;
+    updatePathSaveButtonState();
+    renderPathSavedList(pid);
+    if (document.getElementById('reportPeriod')?.value === pid) loadReportPeriodData(pid);
+
+    toast('已清空本周期 AI 记录，可重新开始分析', 'ok');
 }
 
 function confirmClassify() {
@@ -1235,6 +1409,7 @@ async function onPathPeriodChange(periodId) {
     pendingPathDraft = null;
     renderPathSavedList(periodId);
     updatePathSaveButtonState();
+    updateSettingsPeriodLabel();
 }
 
 async function applyPathNeedPathUserSelection(userId) {
@@ -1264,6 +1439,7 @@ async function initWeekData() {
     currentPeriodId = localStorage.getItem(LS_CURRENT_PERIOD) || feedbackPeriods[0]?.id || 'week_2026_w10';
     await loadPeriodBehaviorIndex(currentPeriodId);
     refreshPathFillUI();
+    updateSettingsPeriodLabel();
 }
 
 function filterCsvLinesForUser(csvText, uid) {
@@ -1560,14 +1736,24 @@ async function loadWeekFeedback() {
 
         if (!rows?.length && isFileProtocol()) {
             hideLoading();
-            rows = await pickTestFixtureFile();
+            toast(
+                '当前为直接打开 HTML，浏览器无法读取 data/test。请双击「启动工具.bat」用 http://localhost:8080 打开，或手动选择 xlsx',
+                'info'
+            );
+            rows = await pickTestFixtureFile({ quiet: true });
+            if (!rows?.length) return;
             showLoading('加载测试文件...');
         }
 
         if (!rows?.length && !isFileProtocol()) {
             hideLoading();
-            toast(`无法读取 ${getTestFeedbackXlsxUrl()}，请确认已用启动工具.bat 打开`, 'err');
-            rows = await pickTestFixtureFile();
+            const fixturePath = getTestFeedbackXlsxUrl();
+            toast(
+                `未找到 ${fixturePath}。请运行 python scripts/sync_test_fixture.py 同步测试文件，或在下方的文件对话框中手动选择 xlsx`,
+                'info'
+            );
+            rows = await pickTestFixtureFile({ quiet: true });
+            if (!rows?.length) return;
             showLoading('加载测试文件...');
         }
 
@@ -1636,6 +1822,7 @@ function activateTab(tabId) {
     if (panel) panel.classList.add('active');
     if (tabId === 'path') onPathTabShown();
     if (tabId === 'report') onReportTabShown();
+    if (tabId === 'settings') updateSettingsPeriodLabel();
 }
 
 function initSettingsPaneNav() {
@@ -1708,6 +1895,9 @@ function initSettings() {
             document.getElementById('settingsStatus').textContent = '❌ ' + e.message;
         }
     });
+
+    document.getElementById('clearPeriodAllBtn')?.addEventListener('click', clearAllPeriodHistory);
+    updateSettingsPeriodLabel();
 }
 
 function getAPIConfig() {
@@ -2748,6 +2938,7 @@ function initPath() {
     });
 
     document.getElementById('pathSaveBtn')?.addEventListener('click', savePendingPathToReport);
+    document.getElementById('clearPathHistoryBtn')?.addEventListener('click', clearPathHistory);
 
     document.getElementById('pathBtn').addEventListener('click', async () => {
         let uid = getActivePathUserId();
@@ -2815,6 +3006,8 @@ function initReport() {
         loadReportPeriodData(pid);
         toast('已刷新该周期材料', 'ok');
     });
+
+    document.getElementById('clearReportHistoryBtn')?.addEventListener('click', clearReportHistory);
 
     document.getElementById('reportBtn')?.addEventListener('click', async () => {
         const periodId = document.getElementById('reportPeriod')?.value || getCurrentPeriodId();
@@ -3045,14 +3238,14 @@ async function fetchTestFeedbackRows() {
     return parseSpreadsheetBuffer(await res.arrayBuffer());
 }
 
-function pickTestFixtureFile() {
+function pickTestFixtureFile(options = {}) {
     return new Promise(resolve => {
         let input = document.getElementById('testFixtureFileInput');
         if (!input) {
             input = document.createElement('input');
             input.type = 'file';
             input.id = 'testFixtureFileInput';
-            input.accept = '.xlsx,.xls';
+            input.accept = '.xlsx,.xls,.csv';
             input.hidden = true;
             document.body.appendChild(input);
             input.addEventListener('change', async () => {
@@ -3071,7 +3264,9 @@ function pickTestFixtureFile() {
                 }
             });
         }
-        toast('请选择 data/test/week_2026_w10_online_feedback.xlsx', 'info');
+        if (!options.quiet) {
+            toast('请选择测试反馈表格（.xlsx / .xls）', 'info');
+        }
         input.click();
     });
 }
@@ -3088,6 +3283,7 @@ function applyFeedbackRowsToUI(rows, periodId) {
     renderBatchTable();
     refreshPathFillUI();
     refreshReportPeriodSelect();
+    updateSettingsPeriodLabel();
 }
 
 async function readFile(file, targetId) {
