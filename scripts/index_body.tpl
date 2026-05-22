@@ -148,82 +148,101 @@
         </div>
         <div id="settings-pane-api" class="settings-pane active" role="tabpanel">
             <p class="settings-pane-desc">{{settings_desc}}</p>
-        <div class="card module-card">
-            <div class="card-head">
-                <h3 class="card-head-title">{{conn_title}}</h3>
-            </div>
-            <div class="form-row">
-                <div class="form-field">
-                    <label for="aiProvider">{{lbl_provider}}</label>
-                    <select id="aiProvider">
-                        <option value="openai">OpenAI</option>
-                        <option value="deepseek">DeepSeek</option>
-                        <option value="zhipu">{{opt_zhipu}}</option>
-                        <option value="custom">{{opt_custom}}</option>
-                    </select>
+            <div class="settings-layout">
+                <div class="settings-layout-main">
+                    <div class="card module-card">
+                        <div class="card-head">
+                            <h3 class="card-head-title">{{conn_title}}</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="aiProvider">{{lbl_provider}}</label>
+                                <select id="aiProvider">
+                                    <option value="openai">OpenAI</option>
+                                    <option value="deepseek">DeepSeek</option>
+                                    <option value="zhipu">{{opt_zhipu}}</option>
+                                    <option value="custom">{{opt_custom}}</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="aiModel">{{lbl_model}}</label>
+                                <input type="text" id="aiModel" value="gpt-4o" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-field">
+                                <label for="apiKey">{{lbl_key}} <span class="label-hint">{{hint_key}}</span></label>
+                                <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-row full" id="customBaseRow" style="display:none;">
+                            <div class="form-field">
+                                <label for="customBase">{{lbl_base}}</label>
+                                <input type="text" id="customBase" placeholder="https://api.aimindsky.com/v1">
+                            </div>
+                        </div>
+                        <div class="card-foot">
+                            <span class="status-text" id="settingsStatus"></span>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-s" id="testApiBtn">{{btn_test}}</button>
+                                <button type="button" class="btn btn-p" id="saveSettingsBtn">{{btn_save}}</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-field">
-                    <label for="aiModel">{{lbl_model}}</label>
-                    <input type="text" id="aiModel" value="gpt-4o" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
-                </div>
+                <aside class="settings-layout-aside" aria-label="{{guide_title}}">
+                    <div class="card module-card settings-guide-card">
+                        <div class="card-head">
+                            <h3 class="card-head-title">{{guide_title}}</h3>
+                        </div>
+                        <div class="tip-list tip-list-compact">
+                            <p><strong>OpenAI</strong> &mdash; {{guide1d}}</p>
+                            <p><strong>DeepSeek</strong> &mdash; {{guide2d}}</p>
+                            <p><strong>{{guide_zhipu_label}}</strong> &mdash; {{guide_zhipu_d}}</p>
+                            <p><strong>{{guide3_label}}</strong> &mdash; {{guide3d}}</p>
+                        </div>
+                        <div class="alert alert-warn">{{warn_key}}</div>
+                    </div>
+                </aside>
             </div>
-            <div class="form-row full">
-                <div class="form-field">
-                    <label for="apiKey">{{lbl_key}} <span class="label-hint">{{hint_key}}</span></label>
-                    <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
-                </div>
-            </div>
-            <div class="form-row full" id="customBaseRow" style="display:none;">
-                <div class="form-field">
-                    <label for="customBase">{{lbl_base}}</label>
-                    <input type="text" id="customBase" placeholder="https://api.aimindsky.com/v1">
-                </div>
-            </div>
-            <div class="card-foot">
-                <span class="status-text" id="settingsStatus"></span>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-s" id="testApiBtn">{{btn_test}}</button>
-                    <button type="button" class="btn btn-p" id="saveSettingsBtn">{{btn_save}}</button>
-                </div>
-            </div>
-        </div>
-        <div class="card module-card">
-            <div class="card-head">
-                <h3 class="card-head-title">{{guide_title}}</h3>
-            </div>
-            <div class="tip-list">
-                <p><strong>OpenAI</strong> &mdash; {{guide1d}}</p>
-                <p><strong>DeepSeek</strong> &mdash; {{guide2d}}</p>
-                <p><strong>{{guide_zhipu_label}}</strong> &mdash; {{guide_zhipu_d}}</p>
-                <p><strong>{{guide3_label}}</strong> &mdash; {{guide3d}}</p>
-            </div>
-            <div class="alert alert-warn">{{warn_key}}</div>
-        </div>
-
         </div>
 
         <div id="settings-pane-knowledge" class="settings-pane" role="tabpanel">
             <p class="settings-pane-desc">{{know_desc}}</p>
-            <div class="card card-know-ai module-card">
-                <div class="card-head">
-                    <h3 class="card-head-title">{{know_ai_title}}</h3>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-s" id="productKnowledgeSaveBtn">{{know_ai_save}}</button>
-                        <button type="button" class="btn btn-p" id="productKnowledgeAiBtn">{{know_ai_btn}}</button>
+            <section class="settings-know-ops" aria-labelledby="know-ops-title">
+                <div class="section-head">
+                    <span class="section-num">01</span>
+                    <h3 class="section-title" id="know-ops-title">{{know_ai_title}}</h3>
+                </div>
+                <div class="card card-know-ai module-card">
+                    <p class="know-ai-desc">{{know_ai_desc}}</p>
+                    <div class="know-editor-grid">
+                        <div class="form-field know-editor-input">
+                            <label for="productSyncInput">{{know_ai_sync_lbl}}</label>
+                            <textarea id="productSyncInput" rows="10" placeholder="{{know_ai_sync_ph}}"></textarea>
+                        </div>
+                        <div class="form-field know-editor-output">
+                            <label for="productKnowledgeExtra">{{know_ai_extra_lbl}} <span class="label-hint">{{know_ai_extra_hint}}</span></label>
+                            <textarea id="productKnowledgeExtra" rows="10" placeholder="{{know_ai_extra_ph}}"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-foot">
+                        <span class="status-text" id="productKnowledgeStatus"></span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-s" id="productKnowledgeSaveBtn">{{know_ai_save}}</button>
+                            <button type="button" class="btn btn-p" id="productKnowledgeAiBtn">{{know_ai_btn}}</button>
+                        </div>
                     </div>
                 </div>
-                <p class="know-ai-desc">{{know_ai_desc}}</p>
-                <div class="form-field">
-                    <label for="productSyncInput">{{know_ai_sync_lbl}}</label>
-                    <textarea id="productSyncInput" rows="5" placeholder="{{know_ai_sync_ph}}"></textarea>
+            </section>
+            <section class="settings-know-ref" aria-labelledby="know-ref-title">
+                <div class="section-head">
+                    <span class="section-num">02</span>
+                    <h3 class="section-title" id="know-ref-title">{{know_ref_title}}</h3>
+                    <p class="section-head-hint">{{know_ref_hint}}</p>
                 </div>
-                <p class="status-text status-text-block" id="productKnowledgeStatus"></p>
-                <div class="form-field know-ai-extra">
-                    <label for="productKnowledgeExtra">{{know_ai_extra_lbl}} <span class="label-hint">{{know_ai_extra_hint}}</span></label>
-                    <textarea id="productKnowledgeExtra" rows="10" placeholder="{{know_ai_extra_ph}}"></textarea>
-                </div>
-            </div>
 {{knowledge}}
+            </section>
         </div>
         </div>
     </section>

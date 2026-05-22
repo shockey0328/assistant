@@ -148,81 +148,99 @@
         </div>
         <div id="settings-pane-api" class="settings-pane active" role="tabpanel">
             <p class="settings-pane-desc">配置 AI 接口后，后续分类、路径与报告均会调用同一套凭证。Key 仅存在浏览器 localStorage。</p>
-        <div class="card module-card">
-            <div class="card-head">
-                <h3 class="card-head-title">连接配置</h3>
-            </div>
-            <div class="form-row">
-                <div class="form-field">
-                    <label for="aiProvider">API 提供方</label>
-                    <select id="aiProvider">
-                        <option value="openai">OpenAI</option>
-                        <option value="deepseek">DeepSeek</option>
-                        <option value="zhipu">智谱 BigModel</option>
-                        <option value="custom">自定义（OpenAI 兼容）</option>
-                    </select>
+            <div class="settings-layout">
+                <div class="settings-layout-main">
+                    <div class="card module-card">
+                        <div class="card-head">
+                            <h3 class="card-head-title">连接配置</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="aiProvider">API 提供方</label>
+                                <select id="aiProvider">
+                                    <option value="openai">OpenAI</option>
+                                    <option value="deepseek">DeepSeek</option>
+                                    <option value="zhipu">智谱 BigModel</option>
+                                    <option value="custom">自定义（OpenAI 兼容）</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="aiModel">模型名称</label>
+                                <input type="text" id="aiModel" value="gpt-4o" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-field">
+                                <label for="apiKey">API Key <span class="label-hint">localStorage 本地存储</span></label>
+                                <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-row full" id="customBaseRow" style="display:none;">
+                            <div class="form-field">
+                                <label for="customBase">自定义 Base URL</label>
+                                <input type="text" id="customBase" placeholder="https://api.aimindsky.com/v1">
+                            </div>
+                        </div>
+                        <div class="card-foot">
+                            <span class="status-text" id="settingsStatus"></span>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-s" id="testApiBtn">测试连接</button>
+                                <button type="button" class="btn btn-p" id="saveSettingsBtn">保存设置</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-field">
-                    <label for="aiModel">模型名称</label>
-                    <input type="text" id="aiModel" value="gpt-4o" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
-                </div>
+                <aside class="settings-layout-aside" aria-label="说明">
+                    <div class="card module-card settings-guide-card">
+                        <div class="card-head">
+                            <h3 class="card-head-title">说明</h3>
+                        </div>
+                        <div class="tip-list tip-list-compact">
+                            <p><strong>OpenAI</strong> &mdash; 官方或代理，推荐 <code>gpt-4o</code></p>
+                            <p><strong>DeepSeek</strong> &mdash; 国内接口，推荐 <code>deepseek-chat</code></p>
+                            <p><strong>智谱 GLM</strong> &mdash; open.bigmodel.cn，推荐 <code>glm-4-flash</code> / <code>glm-4-plus</code></p>
+                            <p><strong>自定义 / 意思天空</strong> &mdash; 填写兼容 Base URL 与 Key</p>
+                        </div>
+                        <div class="alert alert-warn">API Key 仅保留在本机浏览器，请勿在公共电脑保存真实 Key。未配置时 AI 功能不可用。</div>
+                    </div>
+                </aside>
             </div>
-            <div class="form-row full">
-                <div class="form-field">
-                    <label for="apiKey">API Key <span class="label-hint">localStorage 本地存储</span></label>
-                    <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
-                </div>
-            </div>
-            <div class="form-row full" id="customBaseRow" style="display:none;">
-                <div class="form-field">
-                    <label for="customBase">自定义 Base URL</label>
-                    <input type="text" id="customBase" placeholder="https://api.aimindsky.com/v1">
-                </div>
-            </div>
-            <div class="card-foot">
-                <span class="status-text" id="settingsStatus"></span>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-s" id="testApiBtn">测试连接</button>
-                    <button type="button" class="btn btn-p" id="saveSettingsBtn">保存设置</button>
-                </div>
-            </div>
-        </div>
-        <div class="card module-card">
-            <div class="card-head">
-                <h3 class="card-head-title">说明</h3>
-            </div>
-            <div class="tip-list">
-                <p><strong>OpenAI</strong> &mdash; 官方或代理，推荐 <code>gpt-4o</code></p>
-                <p><strong>DeepSeek</strong> &mdash; 国内接口，推荐 <code>deepseek-chat</code></p>
-                <p><strong>智谱 GLM</strong> &mdash; open.bigmodel.cn，推荐 <code>glm-4-flash</code> / <code>glm-4-plus</code></p>
-                <p><strong>自定义 / 意思天空</strong> &mdash; 填写兼容 Base URL 与 Key</p>
-            </div>
-            <div class="alert alert-warn">API Key 仅保留在本机浏览器，请勿在公共电脑保存真实 Key。未配置时 AI 功能不可用。</div>
-        </div>
-
         </div>
 
         <div id="settings-pane-knowledge" class="settings-pane" role="tabpanel">
-            <p class="settings-pane-desc">AI 分析时参照的产品功能说明。产品增删可在下方「AI 知识维护」同步，自动注入分析。</p>
-            <div class="card card-know-ai module-card">
-                <div class="card-head">
-                    <h3 class="card-head-title">AI 知识维护</h3>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-s" id="productKnowledgeSaveBtn">仅保存补充</button>
-                        <button type="button" class="btn btn-p" id="productKnowledgeAiBtn">AI 补充并更新</button>
+            <p class="settings-pane-desc">AI 分析时参照产品功能说明。在「知识维护」同步本期变更，下方「产品参考」为模块与场景对照表。</p>
+            <section class="settings-know-ops" aria-labelledby="know-ops-title">
+                <div class="section-head">
+                    <span class="section-num">01</span>
+                    <h3 class="section-title" id="know-ops-title">AI 知识维护</h3>
+                </div>
+                <div class="card card-know-ai module-card">
+                    <p class="know-ai-desc">贴上本期产品功能增删、调整或下线说明，由 AI 整理并写入「动态补充知识」，后续分类与路径分析均会使用。</p>
+                    <div class="know-editor-grid">
+                        <div class="form-field know-editor-input">
+                            <label for="productSyncInput">本期产品变更说明</label>
+                            <textarea id="productSyncInput" rows="10" placeholder="例：【新增】XX 模块…【调整】同步学…【下线】旧版入口…"></textarea>
+                        </div>
+                        <div class="form-field know-editor-output">
+                            <label for="productKnowledgeExtra">动态补充知识 <span class="label-hint">可手动编辑，保存后生效</span></label>
+                            <textarea id="productKnowledgeExtra" rows="10" placeholder="AI 补充或手动维护的产品知识将显示在此…"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-foot">
+                        <span class="status-text" id="productKnowledgeStatus"></span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-s" id="productKnowledgeSaveBtn">仅保存补充</button>
+                            <button type="button" class="btn btn-p" id="productKnowledgeAiBtn">AI 补充并更新</button>
+                        </div>
                     </div>
                 </div>
-                <p class="know-ai-desc">贴上本期产品功能增删、调整或下线说明，由 AI 整理并写入「动态补充知识」，后续分类与路径分析均会使用。</p>
-                <div class="form-field">
-                    <label for="productSyncInput">本期产品变更说明</label>
-                    <textarea id="productSyncInput" rows="5" placeholder="例：【新增】XX 模块…【调整】同步学…【下线】旧版入口…"></textarea>
+            </section>
+            <section class="settings-know-ref" aria-labelledby="know-ref-title">
+                <div class="section-head">
+                    <span class="section-num">02</span>
+                    <h3 class="section-title" id="know-ref-title">产品参考</h3>
+                    <p class="section-head-hint">AI 分析时对照的模块与场景映射</p>
                 </div>
-                <p class="status-text status-text-block" id="productKnowledgeStatus"></p>
-                <div class="form-field know-ai-extra">
-                    <label for="productKnowledgeExtra">动态补充知识 <span class="label-hint">可手动编辑，保存后生效</span></label>
-                    <textarea id="productKnowledgeExtra" rows="10" placeholder="AI 补充或手动维护的产品知识将显示在此…"></textarea>
-                </div>
-            </div>
             <div class="know-wrap">
                 <div class="card">
                     <h3 class="card-title">使用导航</h3>
@@ -300,6 +318,7 @@
                     </div>
                 </div>
             </div>
+            </section>
         </div>
         </div>
     </section>

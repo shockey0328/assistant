@@ -226,8 +226,177 @@ body {
 .settings-pane-desc {
     font-size: 13px;
     color: var(--text-muted);
-    margin-bottom: var(--s4);
+    margin-bottom: var(--s5);
     line-height: 1.6;
+    max-width: 52em;
+}
+
+/* 设置页：API 主区 + 说明侧栏 */
+.settings-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s5);
+}
+
+.settings-layout-main {
+    min-width: 0;
+}
+
+.settings-layout-aside {
+    min-width: 0;
+}
+
+@media (min-width: 768px) {
+    .settings-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+        gap: var(--s6);
+        align-items: stretch;
+    }
+
+    .settings-layout-main,
+    .settings-layout-aside {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+    }
+
+    .settings-layout-main > .module-card,
+    .settings-layout-aside > .module-card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .settings-layout-main .module-card .card-foot {
+        margin-top: auto;
+    }
+
+    .settings-layout-aside {
+        position: sticky;
+        top: var(--s4);
+    }
+}
+
+.settings-guide-card .card-head {
+    margin-bottom: var(--s3);
+    flex-shrink: 0;
+}
+
+.tip-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+}
+
+.settings-guide-card .alert {
+    margin-top: var(--s4);
+    font-size: 12px;
+}
+
+@media (min-width: 768px) {
+    .settings-guide-card .tip-list {
+        flex: 1 1 auto;
+    }
+
+    .settings-guide-card .alert {
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+}
+
+/* 设置页：产品知识 — 维护区 + 参考区 */
+.settings-know-ops {
+    margin-bottom: var(--s8);
+}
+
+.settings-know-ref .section-head {
+    flex-wrap: wrap;
+}
+
+.section-head-hint {
+    flex: 1 1 100%;
+    margin: 0;
+    padding-left: calc(11px + 0.08em + var(--s3));
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.know-editor-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--s5);
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.know-editor-grid .form-field {
+    min-width: 0;
+}
+
+.know-editor-grid textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 200px;
+}
+
+@media (min-width: 768px) {
+    /* 标签一行、输入框一行，避免左右标签高度不同导致文本框错位 */
+    .know-editor-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto minmax(240px, 1fr);
+        column-gap: var(--s6);
+        row-gap: var(--s3);
+        align-items: stretch;
+    }
+
+    .know-editor-grid .form-field {
+        display: contents;
+    }
+
+    .know-editor-input label {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .know-editor-input textarea {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .know-editor-output label {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .know-editor-output textarea {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .know-editor-grid label {
+        margin: 0;
+        min-height: 2.75rem;
+        align-self: end;
+    }
+
+    .know-editor-grid textarea {
+        min-height: 240px;
+        height: 100%;
+        margin: 0;
+        resize: vertical;
+    }
+}
+
+.card-know-ai .card-foot {
+    margin-top: var(--s5);
+}
+
+.card-know-ai .card-foot .status-text {
+    flex: 1;
+    min-width: 0;
 }
 
 .page-header-compact { margin-bottom: var(--s4); }
@@ -1887,6 +2056,12 @@ textarea::placeholder { color: var(--text-faint); }
     border-radius: 4px;
 }
 
+.tip-list.tip-list-compact p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+}
+
 .alert {
     padding: var(--s3) var(--s4);
     border-radius: var(--radius-sm);
@@ -2586,7 +2761,7 @@ textarea::placeholder { color: var(--text-faint); }
 }
 
 .card-know-ai {
-    margin-bottom: var(--s5);
+    margin-bottom: 0;
     border-color: #fed7aa;
     background: linear-gradient(180deg, #fffbeb 0%, #fff 48%);
 }
@@ -3048,22 +3223,54 @@ textarea::placeholder { color: var(--text-faint); }
         box-shadow var(--dur-fast) var(--ease-out);
 }
 
-/* 设置页：阅读宽度 */
-#tab-settings .page-stack {
-    max-width: 960px;
+/* 设置页：铺满主内容区，避免宽屏右侧留白 */
+#tab-settings .page-stack,
+#tab-settings .settings-pane,
+#tab-settings .settings-layout,
+#tab-settings .settings-know-ops,
+#tab-settings .settings-know-ref,
+#tab-settings .card-know-ai,
+#tab-settings .know-editor-grid {
+    width: 100%;
+    max-width: none;
 }
 
-#tab-settings .know-wrap {
+@media (min-width: 1200px) {
+    #tab-settings .settings-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+    }
+}
+
+#tab-settings .settings-know-ref .know-wrap {
     display: grid;
-    gap: var(--s6);
+    gap: var(--s5);
+    width: 100%;
 }
 
 @media (min-width: 900px) {
-    #tab-settings .know-wrap {
-        grid-template-columns: 1fr 1fr;
+    #tab-settings .settings-know-ref .know-wrap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    #tab-settings .know-wrap > .card:last-child {
+    #tab-settings .settings-know-ref .know-wrap > .card:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 1280px) {
+    #tab-settings .settings-know-ref .know-wrap {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #tab-settings .settings-know-ref .know-wrap > .card:nth-child(1) {
+        grid-column: span 1;
+    }
+
+    #tab-settings .settings-know-ref .know-wrap > .card:nth-child(2) {
+        grid-column: span 2;
+    }
+
+    #tab-settings .settings-know-ref .know-wrap > .card:last-child {
         grid-column: 1 / -1;
     }
 }
