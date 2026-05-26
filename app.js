@@ -715,14 +715,6 @@ function periodHasReportHistory(periodId) {
     }
 }
 
-function updateSettingsPeriodLabel() {
-    const el = document.getElementById('settingsPeriodLabel');
-    if (!el) return;
-    const pid = getCurrentPeriodId();
-    const period = getPeriodById(pid);
-    el.textContent = period ? (period.labelFull || period.label || pid) : (pid || '—');
-}
-
 function clearClassifyAnalysisForPeriod(periodId, options = {}) {
     const pid = periodId || getCurrentPeriodId();
     if (!options.skipRunningCheck && batchRunning && getCurrentPeriodId() === pid) {
@@ -847,40 +839,6 @@ function clearReportHistory() {
     if (clearReportHistoryForPeriod(pid)) {
         toast('已清空周报结果，可重新生成', 'ok');
     }
-}
-
-function clearAllPeriodHistory() {
-    if (batchRunning) {
-        batchAbort = true;
-        toast('正在停止当前分析，请稍后再清空', 'info');
-        return;
-    }
-    const pid = getCurrentPeriodId();
-    const period = getPeriodById(pid);
-    const label = period?.labelFull || period?.label || pid;
-    const parts = [];
-    if (periodHasClassifyAnalysis(pid)) parts.push('反馈分类 AI 结果');
-    if (periodHasPathHistory(pid) || pendingPathDraft?.result) parts.push('路径分析已保存案例');
-    if (periodHasReportHistory(pid)) parts.push('汇总周报生成结果');
-    if (!parts.length) {
-        toast('当前周期暂无可清空的 AI 记录', 'info');
-        return;
-    }
-    const msg = `将清空「${label}」的：\n\n· ${parts.join('\n· ')}\n\n导入的原始反馈数据会保留。清空后需重新分析 / 生成。是否继续？`;
-    if (!confirm(msg)) return;
-
-    clearClassifyAnalysisForPeriod(pid, { skipRunningCheck: true, quiet: true });
-    clearPathHistoryForPeriod(pid, { quiet: true, skipUi: true });
-    clearReportHistoryForPeriod(pid, { quiet: true, skipUi: true });
-
-    resetResultPanel('pathResult', 'pathBody', '完成路径分析后，结果将显示于此');
-    resetResultPanel('reportResult', 'reportBody', '选择周期并生成周报后，结果将显示于此');
-    pendingPathDraft = null;
-    updatePathSaveButtonState();
-    renderPathSavedList(pid);
-    if (document.getElementById('reportPeriod')?.value === pid) loadReportPeriodData(pid);
-
-    toast('已清空本周期 AI 记录，可重新开始分析', 'ok');
 }
 
 function confirmClassify() {
@@ -1409,7 +1367,6 @@ async function onPathPeriodChange(periodId) {
     pendingPathDraft = null;
     renderPathSavedList(periodId);
     updatePathSaveButtonState();
-    updateSettingsPeriodLabel();
 }
 
 async function applyPathNeedPathUserSelection(userId) {
@@ -1439,7 +1396,6 @@ async function initWeekData() {
     currentPeriodId = localStorage.getItem(LS_CURRENT_PERIOD) || feedbackPeriods[0]?.id || 'week_2026_w10';
     await loadPeriodBehaviorIndex(currentPeriodId);
     refreshPathFillUI();
-    updateSettingsPeriodLabel();
 }
 
 function filterCsvLinesForUser(csvText, uid) {
@@ -1822,7 +1778,6 @@ function activateTab(tabId) {
     if (panel) panel.classList.add('active');
     if (tabId === 'path') onPathTabShown();
     if (tabId === 'report') onReportTabShown();
-    if (tabId === 'settings') updateSettingsPeriodLabel();
 }
 
 function initSettingsPaneNav() {
@@ -1896,8 +1851,6 @@ function initSettings() {
         }
     });
 
-    document.getElementById('clearPeriodAllBtn')?.addEventListener('click', clearAllPeriodHistory);
-    updateSettingsPeriodLabel();
 }
 
 function getAPIConfig() {
@@ -3283,7 +3236,6 @@ function applyFeedbackRowsToUI(rows, periodId) {
     renderBatchTable();
     refreshPathFillUI();
     refreshReportPeriodSelect();
-    updateSettingsPeriodLabel();
 }
 
 async function readFile(file, targetId) {

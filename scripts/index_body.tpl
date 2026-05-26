@@ -146,14 +146,6 @@
             <button type="button" class="settings-tab active" role="tab" data-settings-pane="api" aria-selected="true">{{s01}}</button>
             <button type="button" class="settings-tab" role="tab" data-settings-pane="knowledge">{{s06}}</button>
         </div>
-        <div class="settings-period-bar card module-card">
-            <div class="settings-period-bar-text">
-                <span class="settings-period-bar-label">{{settings_data_title}}</span>
-                <strong class="settings-period-bar-value" id="settingsPeriodLabel">—</strong>
-                <p class="settings-period-bar-hint">{{settings_data_desc}}</p>
-            </div>
-            <button type="button" class="btn btn-s" id="clearPeriodAllBtn" title="{{settings_clear_all_title}}">{{btn_clear_period_all}}</button>
-        </div>
         <div id="settings-pane-api" class="settings-pane active" role="tabpanel">
             <p class="settings-pane-desc">{{settings_desc}}</p>
             <div class="settings-layout">

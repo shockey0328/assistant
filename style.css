@@ -231,40 +231,6 @@ body {
     max-width: 52em;
 }
 
-.settings-period-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--s5);
-    flex-wrap: wrap;
-    padding: var(--s4) var(--s5);
-    margin-bottom: var(--s5);
-    background: var(--surface);
-}
-
-.settings-period-bar-text {
-    flex: 1;
-    min-width: 200px;
-}
-
-.settings-period-bar-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-right: var(--s2);
-}
-
-.settings-period-bar-value {
-    font-size: 14px;
-    color: var(--text);
-}
-
-.settings-period-bar-hint {
-    margin: var(--s2) 0 0;
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.5;
-}
-
 /* 设置页：API 主区 + 说明侧栏 */
 .settings-layout {
     display: flex;
