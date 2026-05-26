@@ -3157,8 +3157,51 @@ function initClassify() {
 }
 
 // ==================== 路径分析 ====================
+function placePathModeTip(helpBtn) {
+    const tip = helpBtn?.querySelector('.path-mode-tip');
+    if (!tip) return;
+    const pad = 10;
+    const gap = 8;
+    tip.classList.add('is-visible');
+    tip.style.left = '-9999px';
+    tip.style.top = '0';
+    const r = helpBtn.getBoundingClientRect();
+    const maxW = Math.min(280, window.innerWidth - pad * 2);
+    tip.style.maxWidth = `${maxW}px`;
+    const tw = tip.offsetWidth;
+    let left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(pad, Math.min(left, window.innerWidth - tw - pad));
+    let top = r.bottom + gap;
+    const th = tip.offsetHeight;
+    if (top + th > window.innerHeight - pad) {
+        top = Math.max(pad, r.top - gap - th);
+    }
+    tip.style.left = `${Math.round(left)}px`;
+    tip.style.top = `${Math.round(top)}px`;
+}
+
+function hidePathModeTip(helpBtn) {
+    const tip = helpBtn?.querySelector('.path-mode-tip');
+    if (!tip) return;
+    tip.classList.remove('is-visible');
+    tip.style.left = '';
+    tip.style.top = '';
+}
+
+function initPathModeHelpTips() {
+    document.querySelectorAll('.path-mode-help').forEach(help => {
+        const show = () => placePathModeTip(help);
+        const hide = () => hidePathModeTip(help);
+        help.addEventListener('mouseenter', show);
+        help.addEventListener('focus', show);
+        help.addEventListener('mouseleave', hide);
+        help.addEventListener('blur', hide);
+    });
+}
+
 function initPath() {
     updatePathLocalModeUI();
+    initPathModeHelpTips();
     document.getElementById('pathPeriod')?.addEventListener('change', function () {
         if (this.value) onPathPeriodChange(this.value);
         else fillPathNeedPathUserSelect();

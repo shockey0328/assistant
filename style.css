@@ -3148,6 +3148,15 @@ textarea::placeholder { color: var(--text-faint); }
     display: flex;
     flex-direction: column;
     gap: var(--s4);
+    overflow: visible;
+}
+
+.path-fill-mode {
+    overflow: visible;
+}
+
+.card-path-fill .path-fill-setup {
+    overflow: visible;
 }
 
 .path-fill-mode-legend {
@@ -3263,12 +3272,10 @@ textarea::placeholder { color: var(--text-faint); }
 }
 
 .path-mode-tip {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    z-index: 20;
+    position: fixed;
+    z-index: 10000;
     width: max-content;
-    max-width: min(280px, 72vw);
+    max-width: min(280px, calc(100vw - 24px));
     padding: var(--s3) var(--s4);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
@@ -3286,8 +3293,7 @@ textarea::placeholder { color: var(--text-faint); }
     transition: opacity 0.15s ease, visibility 0.15s ease;
 }
 
-.path-mode-help:hover .path-mode-tip,
-.path-mode-help:focus-visible .path-mode-tip {
+.path-mode-tip.is-visible {
     opacity: 1;
     visibility: visible;
 }
