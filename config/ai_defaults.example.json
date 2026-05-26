@@ -1,0 +1,5 @@
+{
+  "provider": "zhipu",
+  "model": "glm-4-flash",
+  "apiKey": "在此填写智谱 API Key，保存为同目录 ai_defaults.json"
+}

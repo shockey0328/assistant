@@ -67,7 +67,7 @@
                 <div class="import-col-text">
                     <div class="card-head import-col-head">
                         <p class="import-col-caption">粘贴或编辑</p>
-                        <button type="button" class="btn btn-s" id="editDocBtn">编辑文档</button>
+                        <button type="button" class="btn btn-s" id="editDocBtn">刷新预览</button>
                     </div>
                     <textarea id="feedbackInput" rows="14" placeholder="每条反馈一行，或粘贴 CSV / 自由文本…"></textarea>
                     <div id="classifyBelow" class="card-foot classify-below" hidden>
@@ -97,14 +97,15 @@
             <div class="batch-table-wrap">
                 <table class="batch-table batch-table-feedback">
                     <thead>
+                        <tr class="batch-th-group">
+                            <th colspan="4" class="batch-th-group-src">原始反馈</th>
+                            <th colspan="4" class="batch-th-group-ai col-analysis">AI 分析</th>
+                        </tr>
                         <tr>
                             <th class="col-num">序号</th>
-                            <th class="col-l1">一级分类标签</th>
-                            <th class="col-l2-src">二级分类标签</th>
+                            <th class="col-label-src">分类标签</th>
                             <th class="col-msg">有效信息</th>
-                            <th class="col-member">用户身份</th>
-                            <th class="col-uid">用户ID</th>
-                            <th class="col-time">反馈时间</th>
+                            <th class="col-meta">用户信息</th>
                             <th class="col-l2-ai col-analysis">AI二级分类</th>
                             <th class="col-module col-analysis">关联模块</th>
                             <th class="col-result col-analysis">分析详情</th>
@@ -147,7 +148,7 @@
             <button type="button" class="settings-tab" role="tab" data-settings-pane="knowledge">产品知识</button>
         </div>
         <div id="settings-pane-api" class="settings-pane active" role="tabpanel">
-            <p class="settings-pane-desc">配置 AI 接口后，后续分类、路径与报告均会调用同一套凭证。Key 仅存在浏览器 localStorage。</p>
+            <p class="settings-pane-desc">默认智谱 glm-4-flash。团队共用 Key 请写入项目 config/ai_defaults.json（首次打开会自动同步至本机），本地修改仍保存在 localStorage。</p>
             <div class="settings-layout">
                 <div class="settings-layout-main">
                     <div class="card module-card">
@@ -158,20 +159,20 @@
                             <div class="form-field">
                                 <label for="aiProvider">API 提供方</label>
                                 <select id="aiProvider">
+                                    <option value="zhipu" selected>智谱 BigModel</option>
                                     <option value="openai">OpenAI</option>
                                     <option value="deepseek">DeepSeek</option>
-                                    <option value="zhipu">智谱 BigModel</option>
                                     <option value="custom">自定义（OpenAI 兼容）</option>
                                 </select>
                             </div>
                             <div class="form-field">
                                 <label for="aiModel">模型名称</label>
-                                <input type="text" id="aiModel" value="gpt-4o" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
+                                <input type="text" id="aiModel" value="glm-4-flash" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
                             </div>
                         </div>
                         <div class="form-row full">
                             <div class="form-field">
-                                <label for="apiKey">API Key <span class="label-hint">localStorage 本地存储</span></label>
+                                <label for="apiKey">API Key <span class="label-hint">localStorage + config/ai_defaults.json</span></label>
                                 <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
                             </div>
                         </div>
@@ -356,15 +357,25 @@
                                 <label class="path-mode-opt">
                                     <input type="radio" name="pathFillMode" value="filter" checked>
                                     <span class="path-mode-text">
-                                        <span class="path-mode-label">筛选</span>
-                                        <span class="path-mode-hint">从该周期已分类且勾选「需查路径」的用户中选择</span>
+                                        <span class="path-mode-label-wrap">
+                                            <span class="path-mode-label">筛选</span>
+                                            <button type="button" class="path-mode-help" aria-label="筛选说明" onclick="event.preventDefault();event.stopPropagation();">
+                                                <span class="path-mode-help-icon" aria-hidden="true">?</span>
+                                                <span class="path-mode-tip" role="tooltip">从该周期已分类且勾选「需查路径」的用户中选择。选中后自动同步反馈时间与原文，并加载行为日志（若已配置）。</span>
+                                            </button>
+                                        </span>
                                     </span>
                                 </label>
                                 <label class="path-mode-opt">
                                     <input type="radio" name="pathFillMode" value="manual">
                                     <span class="path-mode-text">
-                                        <span class="path-mode-label">自主填写</span>
-                                        <span class="path-mode-hint">手动输入用户 ID 并加载日志</span>
+                                        <span class="path-mode-label-wrap">
+                                            <span class="path-mode-label">自主填写</span>
+                                            <button type="button" class="path-mode-help" aria-label="自主填写说明" onclick="event.preventDefault();event.stopPropagation();">
+                                                <span class="path-mode-help-icon" aria-hidden="true">?</span>
+                                                <span class="path-mode-tip" role="tooltip">手动输入用户 ID，可选本地行为日志目录或使用已同步的测试日志。若分类表中有同 ID 条目，反馈时间与原文会自动匹配。</span>
+                                            </button>
+                                        </span>
                                     </span>
                                 </label>
                             </div>

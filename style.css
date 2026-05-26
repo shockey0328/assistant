@@ -1596,10 +1596,6 @@ body {
     margin: 0 0 var(--s5);
 }
 
-.batch-toolbar {
-    min-height: 44px;
-}
-
 .batch-card {
     padding: 0;
     overflow: hidden;
@@ -1610,7 +1606,8 @@ body {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--s4);
+    gap: var(--s3);
+    min-height: 44px;
     padding: var(--s4) var(--s6);
     border-bottom: 1px solid var(--border);
     background: var(--surface-2);
@@ -2205,7 +2202,7 @@ textarea::placeholder { color: var(--text-faint); }
 
 .batch-table-feedback {
     table-layout: fixed;
-    min-width: 1080px;
+    min-width: 960px;
 }
 
 .batch-table th {
@@ -2213,7 +2210,7 @@ textarea::placeholder { color: var(--text-faint); }
     top: 0;
     background: var(--text-2);
     z-index: 1;
-    padding: 11px 12px;
+    padding: 10px 12px;
     text-align: left;
     font-size: 12px;
     font-weight: 600;
@@ -2221,7 +2218,7 @@ textarea::placeholder { color: var(--text-faint); }
     line-height: 1.35;
     color: rgba(255, 255, 255, 0.92);
     border-bottom: none;
-    vertical-align: bottom;
+    vertical-align: middle;
     word-break: keep-all;
 }
 
@@ -2230,10 +2227,14 @@ textarea::placeholder { color: var(--text-faint); }
 }
 
 .batch-table td {
-    padding: 14px;
+    padding: 12px 10px;
     border-bottom: 1px solid var(--border);
     vertical-align: top;
     font-size: 13px;
+}
+
+.batch-table-feedback td {
+    vertical-align: top;
 }
 
 .batch-table tbody tr:hover td { background: #fafaf9; }
@@ -2246,16 +2247,24 @@ textarea::placeholder { color: var(--text-faint); }
     font-variant-numeric: tabular-nums;
 }
 
-.batch-table-feedback .col-l1 { width: 9%; }
-.batch-table-feedback .col-l2-src { width: 9%; }
-.batch-table-feedback .col-msg { width: 22%; min-width: 160px; }
-.batch-table-feedback .col-member { width: 8%; text-align: center; vertical-align: middle; }
-.batch-table-feedback .col-uid { width: 9%; font-size: 12px; font-variant-numeric: tabular-nums; vertical-align: middle; }
-.batch-table-feedback .col-time { width: 11%; font-size: 12px; font-variant-numeric: tabular-nums; vertical-align: middle; word-break: break-word; }
-.batch-table-feedback .col-l2-ai { width: 9%; vertical-align: middle; }
-.batch-table-feedback .col-module { width: 8%; vertical-align: middle; }
-.batch-table-feedback .col-result { width: 14%; }
-.batch-table-feedback .col-path { width: 7%; text-align: center; vertical-align: middle; }
+.batch-table-feedback .col-num { width: 4%; }
+.batch-table-feedback .col-label-src { width: 11%; min-width: 100px; }
+.batch-table-feedback .col-msg { width: 22%; min-width: 140px; }
+.batch-table-feedback .col-meta {
+    width: 11%;
+    min-width: 112px;
+    max-width: 140px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.batch-table-feedback th.col-meta {
+    text-align: center;
+}
+.batch-table-feedback .col-l2-ai { width: 9%; }
+.batch-table-feedback .col-module { width: 8%; }
+.batch-table-feedback .col-result { width: 30%; min-width: 200px; }
+.batch-table-feedback .col-path { width: 8%; min-width: 88px; }
 
 .batch-table-feedback td.col-analysis,
 .batch-table-feedback th.col-analysis {
@@ -2266,8 +2275,110 @@ textarea::placeholder { color: var(--text-faint); }
     border-left: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.col-member { min-width: 72px; text-align: center; vertical-align: middle; }
-.col-uid { min-width: 88px; font-size: 12px; font-variant-numeric: tabular-nums; vertical-align: middle; }
+.batch-th-group th {
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.75);
+    background: #292524;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+}
+
+.batch-th-group .batch-th-group-ai {
+    background: #44403c;
+    border-left: 2px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.batch-th-group .batch-th-group-src {
+    text-align: center;
+}
+
+.batch-label-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.batch-label-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 6px;
+    line-height: 1.4;
+}
+
+.batch-label-k {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+}
+
+.batch-label-v {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    word-break: break-word;
+}
+
+.batch-meta-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 100%;
+    text-align: center;
+}
+
+.batch-meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    line-height: 1.3;
+}
+
+.batch-table-feedback .batch-meta-stack .analysis-tag-member {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    line-height: 1.25;
+    border-radius: 4px;
+    letter-spacing: 0.01em;
+}
+
+.batch-meta-uid .cell-uid {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    letter-spacing: 0.03em;
+}
+
+.batch-meta-time {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+    text-align: center;
+    word-break: break-word;
+}
+
+.batch-table-feedback .batch-meta-time {
+    max-width: 100%;
+}
 
 .cell-uid {
     font-weight: 600;
@@ -2293,15 +2404,17 @@ textarea::placeholder { color: var(--text-faint); }
     font-variant-numeric: tabular-nums;
 }
 
-.col-path { min-width: 96px; width: 9%; text-align: center; vertical-align: middle; }
+.batch-table-feedback .col-path {
+    text-align: left;
+}
 
 .path-check-tag {
     display: inline-flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     cursor: pointer;
-    padding: 6px 8px;
+    padding: 6px 10px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface);
@@ -2336,7 +2449,7 @@ textarea::placeholder { color: var(--text-faint); }
 .col-msg { min-width: 180px; }
 
 .col-l2,
-.col-l2-ai { min-width: 96px; vertical-align: middle; }
+.col-l2-ai { min-width: 88px; }
 
 .cell-source-tag {
     display: inline-block;
@@ -2346,8 +2459,7 @@ textarea::placeholder { color: var(--text-faint); }
     word-break: break-word;
     color: var(--text-2);
 }
-.col-module { min-width: 100px; width: 11%; vertical-align: middle; }
-.col-result { min-width: 220px; width: 24%; }
+.col-module { min-width: 88px; }
 
 .analysis-tag {
     display: inline-block;
@@ -2389,11 +2501,64 @@ textarea::placeholder { color: var(--text-faint); }
 }
 
 .tag-src {
-    display: block;
-    margin-top: 4px;
+    display: inline-block;
     font-size: 10px;
     font-weight: 500;
-    color: var(--text-3);
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+}
+
+.batch-l2-human {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.cell-slot-pending {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border);
+    background: rgba(250, 250, 249, 0.9);
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.cell-slot-pending-icon {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #d6d3d1;
+    flex-shrink: 0;
+}
+
+.cell-slot-running {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--brand);
+}
+
+.cell-slot-running-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand);
+    flex-shrink: 0;
+    animation: batch-pulse 1s ease-in-out infinite;
+}
+
+@keyframes batch-pulse {
+    0%, 100% { opacity: 0.35; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
 }
 
 .msg-preview {
@@ -2526,10 +2691,17 @@ textarea::placeholder { color: var(--text-faint); }
 }
 
 /* 分类表内修订 */
+.batch-table-feedback .batch-edit-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+}
+
 .batch-edit-wrap {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
 }
 .batch-edit-l2,
@@ -2552,6 +2724,48 @@ textarea::placeholder { color: var(--text-faint); }
     white-space: nowrap;
 }
 .cell-result-view { position: relative; }
+
+.batch-table-feedback .cell-result-view {
+    max-height: min(220px, 42vh);
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.batch-table-feedback .cell-result-view.result-md {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-2);
+}
+
+.batch-table-feedback .cell-result-view.result-md h1,
+.batch-table-feedback .cell-result-view.result-md h2,
+.batch-table-feedback .cell-result-view.result-md h3,
+.batch-table-feedback .cell-result-view.result-md h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 8px 0 4px;
+    color: var(--text);
+}
+
+.batch-table-feedback .cell-result-view.result-md p {
+    margin: 4px 0;
+}
+
+.batch-table-feedback .cell-result-view.result-md ul,
+.batch-table-feedback .cell-result-view.result-md ol {
+    margin: 4px 0 6px;
+    padding-left: 1.25em;
+}
+
+.batch-table-feedback .cell-result-view.result-md li {
+    margin: 2px 0;
+}
+
+.batch-table-feedback .cell-result-view.result-md hr {
+    margin: 8px 0;
+}
+
 .btn-link.batch-edit-result-btn {
     display: inline-block;
     margin-top: 8px;
@@ -2987,6 +3201,14 @@ textarea::placeholder { color: var(--text-faint); }
     min-width: 0;
 }
 
+.path-mode-label-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 2px;
+    max-width: 100%;
+}
+
 .path-mode-label {
     font-size: 14px;
     font-weight: 600;
@@ -3001,6 +3223,73 @@ textarea::placeholder { color: var(--text-faint); }
     line-height: 1.55;
     padding: 0;
     margin: 0;
+}
+
+.path-mode-help {
+    position: relative;
+    top: -3px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    margin: 0 0 0 1px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+    flex-shrink: 0;
+    vertical-align: top;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.path-mode-help:hover,
+.path-mode-help:focus-visible {
+    color: var(--brand);
+    border-color: var(--brand);
+    background: var(--brand-light);
+    outline: none;
+}
+
+.path-mode-help-icon {
+    pointer-events: none;
+}
+
+.path-mode-tip {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 20;
+    width: max-content;
+    max-width: min(280px, 72vw);
+    padding: var(--s3) var(--s4);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--text-2);
+    color: #fafaf9;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.55;
+    text-align: left;
+    white-space: normal;
+    box-shadow: var(--sh-lg);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.path-mode-help:hover .path-mode-tip,
+.path-mode-help:focus-visible .path-mode-tip {
+    opacity: 1;
+    visibility: visible;
 }
 
 .path-fill-details {
@@ -3204,6 +3493,96 @@ textarea::placeholder { color: var(--text-faint); }
 
 .batch-table tbody tr:hover td {
     background: var(--brand-light) !important;
+}
+
+/* 批量表：行状态 */
+.batch-table-feedback tr.batch-row-pending td.col-l2-ai,
+.batch-table-feedback tr.batch-row-pending td.col-module,
+.batch-table-feedback tr.batch-row-pending td.col-result,
+.batch-table-feedback tr.batch-row-pending td.col-path {
+    background: rgba(250, 250, 249, 0.85);
+}
+
+.batch-table-feedback tr.batch-row-running td.col-l2-ai,
+.batch-table-feedback tr.batch-row-running td.col-module,
+.batch-table-feedback tr.batch-row-running td.col-result,
+.batch-table-feedback tr.batch-row-running td.col-path {
+    background: rgba(255, 247, 237, 0.45);
+}
+
+.batch-table-feedback tr.batch-row-done td.col-l2-ai,
+.batch-table-feedback tr.batch-row-done td.col-module,
+.batch-table-feedback tr.batch-row-done td.col-result,
+.batch-table-feedback tr.batch-row-done td.col-path {
+    background: rgba(255, 251, 235, 0.28);
+}
+
+.batch-table-feedback tr.batch-row-error td.col-result {
+    background: rgba(254, 242, 242, 0.65);
+}
+
+.batch-table-feedback tr.batch-row-pending:hover td.col-l2-ai,
+.batch-table-feedback tr.batch-row-pending:hover td.col-module,
+.batch-table-feedback tr.batch-row-pending:hover td.col-result,
+.batch-table-feedback tr.batch-row-pending:hover td.col-path {
+    background: rgba(245, 245, 244, 0.95) !important;
+}
+
+.batch-table-feedback tr.batch-row-done:hover td.col-result {
+    background: rgba(255, 247, 237, 0.65) !important;
+}
+
+.batch-table-feedback .col-num {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--surface);
+    box-shadow: 1px 0 0 var(--border);
+}
+
+.batch-table-feedback tbody tr:nth-child(even) .col-num {
+    background: #fafaf9;
+}
+
+.batch-table-feedback tbody tr:hover .col-num {
+    background: var(--brand-light) !important;
+}
+
+.batch-table-feedback th.col-num {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--text-2);
+}
+
+.path-check-tag.path-check-disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    border-style: dashed;
+    background: var(--surface-2);
+}
+
+.path-check-tag.path-check-disabled:hover {
+    border-color: var(--border);
+    background: var(--surface-2);
+}
+
+.path-check-tag.path-check-disabled input {
+    cursor: not-allowed;
+}
+
+.batch-table-feedback .col-msg .msg-preview {
+    color: var(--text);
+}
+
+.batch-table-feedback tr.batch-row-pending .col-msg .msg-preview {
+    color: var(--text-2);
+}
+
+.batch-table-feedback .batch-edit-l2,
+.batch-table-feedback .batch-edit-module {
+    max-width: 100%;
+    width: 100%;
 }
 
 /* 卡片与上传：即时反馈 */

@@ -97,14 +97,15 @@
             <div class="batch-table-wrap">
                 <table class="batch-table batch-table-feedback">
                     <thead>
+                        <tr class="batch-th-group">
+                            <th colspan="4" class="batch-th-group-src">原始反馈</th>
+                            <th colspan="4" class="batch-th-group-ai col-analysis">AI 分析</th>
+                        </tr>
                         <tr>
                             <th class="col-num">{{th_num}}</th>
-                            <th class="col-l1">{{th_l1}}</th>
-                            <th class="col-l2-src">{{th_l2_src}}</th>
+                            <th class="col-label-src">{{th_label_src}}</th>
                             <th class="col-msg">{{th_msg}}</th>
-                            <th class="col-member">{{th_member}}</th>
-                            <th class="col-uid">{{th_user_id}}</th>
-                            <th class="col-time">{{th_time}}</th>
+                            <th class="col-meta">{{th_user_meta}}</th>
                             <th class="col-l2-ai col-analysis">{{th_l2_ai}}</th>
                             <th class="col-module col-analysis">{{th_module}}</th>
                             <th class="col-result col-analysis">{{th_detail}}</th>
@@ -158,15 +159,15 @@
                             <div class="form-field">
                                 <label for="aiProvider">{{lbl_provider}}</label>
                                 <select id="aiProvider">
+                                    <option value="zhipu" selected>{{opt_zhipu}}</option>
                                     <option value="openai">OpenAI</option>
                                     <option value="deepseek">DeepSeek</option>
-                                    <option value="zhipu">{{opt_zhipu}}</option>
                                     <option value="custom">{{opt_custom}}</option>
                                 </select>
                             </div>
                             <div class="form-field">
                                 <label for="aiModel">{{lbl_model}}</label>
-                                <input type="text" id="aiModel" value="gpt-4o" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
+                                <input type="text" id="aiModel" value="glm-4-flash" placeholder="gpt-4o / deepseek-chat / glm-4-flash">
                             </div>
                         </div>
                         <div class="form-row full">
@@ -280,15 +281,25 @@
                                 <label class="path-mode-opt">
                                     <input type="radio" name="pathFillMode" value="filter" checked>
                                     <span class="path-mode-text">
-                                        <span class="path-mode-label">{{path_mode_filter}}</span>
-                                        <span class="path-mode-hint">{{path_mode_filter_hint}}</span>
+                                        <span class="path-mode-label-wrap">
+                                            <span class="path-mode-label">{{path_mode_filter}}</span>
+                                            <button type="button" class="path-mode-help" aria-label="{{path_mode_filter}}说明" onclick="event.preventDefault();event.stopPropagation();">
+                                                <span class="path-mode-help-icon" aria-hidden="true">?</span>
+                                                <span class="path-mode-tip" role="tooltip">{{path_mode_filter_tip}}</span>
+                                            </button>
+                                        </span>
                                     </span>
                                 </label>
                                 <label class="path-mode-opt">
                                     <input type="radio" name="pathFillMode" value="manual">
                                     <span class="path-mode-text">
-                                        <span class="path-mode-label">{{path_mode_manual}}</span>
-                                        <span class="path-mode-hint">{{path_mode_manual_hint}}</span>
+                                        <span class="path-mode-label-wrap">
+                                            <span class="path-mode-label">{{path_mode_manual}}</span>
+                                            <button type="button" class="path-mode-help" aria-label="{{path_mode_manual}}说明" onclick="event.preventDefault();event.stopPropagation();">
+                                                <span class="path-mode-help-icon" aria-hidden="true">?</span>
+                                                <span class="path-mode-tip" role="tooltip">{{path_mode_manual_tip}}</span>
+                                            </button>
+                                        </span>
                                     </span>
                                 </label>
                             </div>

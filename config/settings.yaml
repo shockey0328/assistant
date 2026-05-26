@@ -3,10 +3,10 @@
 # =============================================
 
 ai:
-  provider: "openai"          # openai / anthropic / deepseek / zhipu
-  model: "gpt-4o"             # 模型名称
-  base_url: "https://api.aimindsky.com/v1"
-  api_key_env: "OPENAI_API_KEY"  # API密钥的环境变量名
+  provider: "zhipu"           # openai / anthropic / deepseek / zhipu
+  model: "glm-4-flash"        # 模型名称
+  base_url: "https://open.bigmodel.cn/api/paas/v4"
+  api_key_env: "ZHIPU_API_KEY"  # 亦可使用 config/ai_defaults.json（前端）
   temperature: 0.3
   max_tokens: 8000
 

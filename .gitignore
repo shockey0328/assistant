@@ -11,6 +11,7 @@ venv/
 # 环境与密钥
 .env
 .env.*
+config/ai_defaults.json
 
 # 数据（保留目录结构）
 data/input/*
